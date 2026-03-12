@@ -245,7 +245,7 @@ export default function App() {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
-          "x-api-key": "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",
+          "x-api-key": "YOUR_API_KEY_HERE",
           "anthropic-version": "2023-06-01",
           "anthropic-dangerous-direct-browser-access": "true"
         },
