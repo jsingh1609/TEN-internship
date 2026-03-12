@@ -1,16 +1,16 @@
 import { useState, useRef } from "react";
 
 const LANG_CONFIG = {
-  python:     { label: "Python",     icon: "🐍", ext: "py",   color: "#3b82f6" },
-  javascript: { label: "JavaScript", icon: "⚡", ext: "js",   color: "#f59e0b" },
-  typescript: { label: "TypeScript", icon: "🔷", ext: "ts",   color: "#6366f1" },
-  java:       { label: "Java",       icon: "☕", ext: "java", color: "#ef4444" },
-  cpp:        { label: "C++",        icon: "⚙️", ext: "cpp",  color: "#8b5cf6" },
-  rust:       { label: "Rust",       icon: "🦀", ext: "rs",   color: "#f97316" },
-  go:         { label: "Go",         icon: "🐹", ext: "go",   color: "#06b6d4" },
-  swift:      { label: "Swift",      icon: "🐦", ext: "swift",color: "#f43f5e" },
-  kotlin:     { label: "Kotlin",     icon: "🎯", ext: "kt",   color: "#a855f7" },
-  ruby:       { label: "Ruby",       icon: "💎", ext: "rb",   color: "#dc2626" },
+  python: { label: "Python", icon: "🐍", ext: "py", color: "#3b82f6" },
+  javascript: { label: "JavaScript", icon: "⚡", ext: "js", color: "#f59e0b" },
+  typescript: { label: "TypeScript", icon: "🔷", ext: "ts", color: "#6366f1" },
+  java: { label: "Java", icon: "☕", ext: "java", color: "#ef4444" },
+  cpp: { label: "C++", icon: "⚙️", ext: "cpp", color: "#8b5cf6" },
+  rust: { label: "Rust", icon: "🦀", ext: "rs", color: "#f97316" },
+  go: { label: "Go", icon: "🐹", ext: "go", color: "#06b6d4" },
+  swift: { label: "Swift", icon: "🐦", ext: "swift", color: "#f43f5e" },
+  kotlin: { label: "Kotlin", icon: "🎯", ext: "kt", color: "#a855f7" },
+  ruby: { label: "Ruby", icon: "💎", ext: "rb", color: "#dc2626" },
 };
 
 const SAMPLE_CODES = {
@@ -215,13 +215,13 @@ end`,
 };
 
 const COMPLEXITY_META = {
-  "O(1)":       { color: "#10b981", glow: "#10b98130", label: "Constant",     perf: 100, emoji: "🚀" },
-  "O(log n)":   { color: "#06b6d4", glow: "#06b6d430", label: "Logarithmic",  perf: 85,  emoji: "✨" },
-  "O(n)":       { color: "#f59e0b", glow: "#f59e0b30", label: "Linear",       perf: 65,  emoji: "⚡" },
-  "O(n log n)": { color: "#f97316", glow: "#f9731630", label: "Linearithmic", perf: 50,  emoji: "⚠️" },
-  "O(n²)":      { color: "#ef4444", glow: "#ef444430", label: "Quadratic",    perf: 30,  emoji: "🔥" },
-  "O(n³)":      { color: "#dc2626", glow: "#dc262630", label: "Cubic",        perf: 15,  emoji: "💀" },
-  "O(2ⁿ)":      { color: "#9333ea", glow: "#9333ea30", label: "Exponential",  perf: 5,   emoji: "☠️" },
+  "O(1)": { color: "#10b981", glow: "#10b98130", label: "Constant", perf: 100, emoji: "🚀" },
+  "O(log n)": { color: "#06b6d4", glow: "#06b6d430", label: "Logarithmic", perf: 85, emoji: "✨" },
+  "O(n)": { color: "#f59e0b", glow: "#f59e0b30", label: "Linear", perf: 65, emoji: "⚡" },
+  "O(n log n)": { color: "#f97316", glow: "#f9731630", label: "Linearithmic", perf: 50, emoji: "⚠️" },
+  "O(n²)": { color: "#ef4444", glow: "#ef444430", label: "Quadratic", perf: 30, emoji: "🔥" },
+  "O(n³)": { color: "#dc2626", glow: "#dc262630", label: "Cubic", perf: 15, emoji: "💀" },
+  "O(2ⁿ)": { color: "#9333ea", glow: "#9333ea30", label: "Exponential", perf: 5, emoji: "☠️" },
 };
 
 export default function App() {
@@ -243,9 +243,9 @@ export default function App() {
     try {
       const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "x-api-key": import.meta.env.VITE_ANALYZER_TOKEN,
+          "x-api-key": "PASTE_YOUR_NEW_KEY_HERE",
           "anthropic-version": "2023-06-01",
           "anthropic-dangerous-direct-browser-access": "true"
         },
@@ -334,14 +334,14 @@ ${code}
       <nav style={{ padding: "0 24px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #1a1a25", background: "#0c0c10", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 8, background: "linear-gradient(135deg, #1e1b4b, #2e1065)", border: "1px solid #6366f140", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 3C9.5 3 7.5 4.5 7 6.5C5.5 7 4 8.5 4 10.5C4 12 4.8 13.3 6 14C6 16.2 7.8 18 10 18H14C16.2 18 18 16.2 18 14C19.2 13.3 20 12 20 10.5C20 8.5 18.5 7 17 6.5C16.5 4.5 14.5 3 12 3Z" stroke="#818cf8" strokeWidth="1.4" strokeLinejoin="round"/>
-                <path d="M9 12h1.5M13.5 12H15M12 10v4" stroke="#a5b4fc" strokeWidth="1.4" strokeLinecap="round"/>
-                <path d="M10 18v2M14 18v2" stroke="#6366f1" strokeWidth="1.4" strokeLinecap="round"/>
-                <circle cx="8" cy="10.5" r="1" fill="#818cf8"/>
-                <circle cx="16" cy="10.5" r="1" fill="#818cf8"/>
-              </svg>
-            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 3C9.5 3 7.5 4.5 7 6.5C5.5 7 4 8.5 4 10.5C4 12 4.8 13.3 6 14C6 16.2 7.8 18 10 18H14C16.2 18 18 16.2 18 14C19.2 13.3 20 12 20 10.5C20 8.5 18.5 7 17 6.5C16.5 4.5 14.5 3 12 3Z" stroke="#818cf8" strokeWidth="1.4" strokeLinejoin="round" />
+              <path d="M9 12h1.5M13.5 12H15M12 10v4" stroke="#a5b4fc" strokeWidth="1.4" strokeLinecap="round" />
+              <path d="M10 18v2M14 18v2" stroke="#6366f1" strokeWidth="1.4" strokeLinecap="round" />
+              <circle cx="8" cy="10.5" r="1" fill="#818cf8" />
+              <circle cx="16" cy="10.5" r="1" fill="#818cf8" />
+            </svg>
+          </div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 700, fontFamily: "Inter, sans-serif", color: "#f1f5f9", letterSpacing: "0.04em" }}>
               complexity<span style={{ color: "#818cf8" }}>.</span>dev
@@ -433,16 +433,16 @@ ${code}
 
                 {/* Analyze button */}
                 <button className="analyze-btn" onClick={analyzeCode} disabled={loading || !code.trim()}
-                  style={{ padding: "13px", borderRadius: 10, border: "none", background: loading || !code.trim() ? "#111118" : "linear-gradient(135deg, #6366f1, #8b5cf6)", color: loading || !code.trim() ? "#2d2d4a" : "#fff", fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", cursor: loading || !code.trim() ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif", boxShadow: loading || !code.trim() ? "none" : "0 4px 20px #6366f135", border: loading || !code.trim() ? "1px solid #1e1e2e" : "none" }}>
+                  style={{ padding: "13px", borderRadius: 10, border: loading || !code.trim() ? "1px solid #1e1e2e" : "none", background: loading || !code.trim() ? "#111118" : "linear-gradient(135deg, #6366f1, #8b5cf6)", color: loading || !code.trim() ? "#2d2d4a" : "#fff", fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", cursor: loading || !code.trim() ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif", boxShadow: loading || !code.trim() ? "none" : "0 4px 20px #6366f135" }}>
                   {loading
                     ? <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                        <span style={{ width: 13, height: 13, border: "2px solid #2d2d4a", borderTopColor: "#818cf8", borderRadius: "50%", display: "inline-block", animation: "spin 0.7s linear infinite" }} />
-                        Analyzing…
-                      </span>
+                      <span style={{ width: 13, height: 13, border: "2px solid #2d2d4a", borderTopColor: "#818cf8", borderRadius: "50%", display: "inline-block", animation: "spin 0.7s linear infinite" }} />
+                      Analyzing…
+                    </span>
                     : <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                        <span style={{ fontSize: 18, lineHeight: 1 }}>{lc.icon}</span>
-                        Analyze Complexity
-                      </span>
+                      <span style={{ fontSize: 18, lineHeight: 1 }}>{lc.icon}</span>
+                      Analyze Complexity
+                    </span>
                   }
                 </button>
 
@@ -536,26 +536,26 @@ ${code}
               <div style={{ fontSize: 9, letterSpacing: "0.18em", color: "#2d2d4a", fontFamily: "Inter, sans-serif", marginBottom: 14 }}>ANALYSIS HISTORY</div>
               {history.length === 0
                 ? <div style={{ textAlign: "center", padding: "80px 0", color: "#252535" }}>
-                    <div style={{ fontSize: 36, marginBottom: 10 }}>📭</div>
-                    <div style={{ fontSize: 13, fontFamily: "Inter, sans-serif" }}>No analyses yet — go analyze some code!</div>
-                  </div>
+                  <div style={{ fontSize: 36, marginBottom: 10 }}>📭</div>
+                  <div style={{ fontSize: 13, fontFamily: "Inter, sans-serif" }}>No analyses yet — go analyze some code!</div>
+                </div>
                 : <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                    {history.map((item, i) => {
-                      const m = COMPLEXITY_META[item.result.complexity] || COMPLEXITY_META["O(n)"];
-                      const lconf = LANG_CONFIG[item.language];
-                      return (
-                        <div key={i} className="hist-item" onClick={() => { setCode(item.snippet); setLanguage(item.language); setResult(item.result); setActiveTab("editor"); }}
-                          style={{ padding: "13px 16px", background: "#0f0f13", border: "1px solid #1a1a25", borderRadius: 10, display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
-                          <div style={{ padding: "4px 10px", background: m.glow, border: `1px solid ${m.color}35`, borderRadius: 6, color: m.color, fontSize: 12, fontWeight: 700, fontFamily: "Inter, sans-serif", flexShrink: 0, minWidth: 72, textAlign: "center" }}>{item.result.complexity}</div>
-                          <div style={{ flex: 1, overflow: "hidden" }}>
-                            <div style={{ fontSize: 11.5, color: "#3d3d5a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 3 }}>{item.snippet}</div>
-                            <div style={{ fontSize: 10, color: "#252535", fontFamily: "Inter, sans-serif" }}>{lconf?.icon} {lconf?.label} · {item.time}</div>
-                          </div>
-                          <div style={{ fontSize: 14, color: "#252535" }}>›</div>
+                  {history.map((item, i) => {
+                    const m = COMPLEXITY_META[item.result.complexity] || COMPLEXITY_META["O(n)"];
+                    const lconf = LANG_CONFIG[item.language];
+                    return (
+                      <div key={i} className="hist-item" onClick={() => { setCode(item.snippet); setLanguage(item.language); setResult(item.result); setActiveTab("editor"); }}
+                        style={{ padding: "13px 16px", background: "#0f0f13", border: "1px solid #1a1a25", borderRadius: 10, display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
+                        <div style={{ padding: "4px 10px", background: m.glow, border: `1px solid ${m.color}35`, borderRadius: 6, color: m.color, fontSize: 12, fontWeight: 700, fontFamily: "Inter, sans-serif", flexShrink: 0, minWidth: 72, textAlign: "center" }}>{item.result.complexity}</div>
+                        <div style={{ flex: 1, overflow: "hidden" }}>
+                          <div style={{ fontSize: 11.5, color: "#3d3d5a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 3 }}>{item.snippet}</div>
+                          <div style={{ fontSize: 10, color: "#252535", fontFamily: "Inter, sans-serif" }}>{lconf?.icon} {lconf?.label} · {item.time}</div>
                         </div>
-                      );
-                    })}
-                  </div>
+                        <div style={{ fontSize: 14, color: "#252535" }}>›</div>
+                      </div>
+                    );
+                  })}
+                </div>
               }
             </div>
           )}
