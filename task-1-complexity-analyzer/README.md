@@ -8,6 +8,11 @@ An AI-powered tool that analyzes source code and estimates its **time complexity
 
 ---
 
+## 🌐 Live Demo
+https://smart-code-complexity-analyzer.vercel.app
+
+---
+
 ## 🚀 Features
 
 - **AI-Powered Analysis** — Uses Claude Sonnet to detect loops, recursion, and nested patterns
