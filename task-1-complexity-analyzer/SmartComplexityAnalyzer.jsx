@@ -245,7 +245,7 @@ export default function App() {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
-          "x-api-key": "YOUR_API_KEY_HERE",
+          "x-api-key": import.meta.env.VITE_ANALYZER_TOKEN,
           "anthropic-version": "2023-06-01",
           "anthropic-dangerous-direct-browser-access": "true"
         },
