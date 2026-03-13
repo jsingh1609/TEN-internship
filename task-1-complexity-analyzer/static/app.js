@@ -647,7 +647,7 @@ function displayMasterVerdict(res1, lang1, res2, lang2) {
     // Both same complexity
     title = "🤝 It's an Efficiency Tie!";
     if (lang1 === lang2) {
-      advice = `Both implementations share O(${res1.complexity}) complexity. Choose the code that is more readable or maintainable.`;
+      advice = `Both implementations share ${res1.complexity} complexity. Choose the code that is more readable or maintainable.`;
     } else {
       // Different languages
       advice = getLanguageAdvice(lang1, lang2);
