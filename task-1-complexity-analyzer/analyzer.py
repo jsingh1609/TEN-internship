@@ -139,15 +139,15 @@ class PythonAnalyzer(ast.NodeVisitor):
         """Check if recursion splits the input (e.g., merge sort, quicksort)."""
         source_lower = self.source.lower()
         divide_patterns = [
-            "mid", "// 2", "len(", "left", "right",
-            "[:mid]", "[mid:]", "lo", "hi", "low", "high",
+            r"\bmid\b", r"//\s*2", r"\blen\s*\(", r"\bleft\b", r"\bright\b",
+            r"\[\s*:?\s*mid\b", r"\blo\b", r"\bhi\b", r"\blow\b", r"\bhigh\b",
         ]
         if self.recursions and sum(1 for _ in self.recursions) >= 2:
-            if any(p in source_lower for p in divide_patterns):
+            if any(re.search(p, source_lower) for p in divide_patterns):
                 return True
         # Also check for single recursion with halving
         if self.recursions:
-            if any(p in source_lower for p in ["// 2", ">> 1", "/ 2"]):
+            if any(re.search(p, source_lower) for p in [r"//\s*2", r">>\s*1", r"/\s*2"]):
                 return True
         return False
 
@@ -199,7 +199,16 @@ class PythonAnalyzer(ast.NodeVisitor):
                     details,
                 )
 
-        # Case 4: Linear recursion (single recursive call, no halving)
+        # Case 4: Exponential recursion (≥2 recursive calls without divide-and-conquer)
+        if len(self.recursions) >= 2 and not has_divide_conquer:
+            return ComplexityResult(
+                "O(2ⁿ)",
+                "The code has multiple recursive calls without dividing the input "
+                "(e.g., naive Fibonacci), resulting in O(2ⁿ) exponential time complexity.",
+                details,
+            )
+
+        # Case 5: Linear recursion (single recursive call, no halving)
         if self.recursions and not has_divide_conquer:
             if self.max_loop_depth == 0:
                 return ComplexityResult(
@@ -215,15 +224,6 @@ class PythonAnalyzer(ast.NodeVisitor):
                     "resulting in O(n²) quadratic time complexity.",
                     details,
                 )
-
-        # Case 5: Exponential recursion (≥2 recursive calls without divide-and-conquer)
-        if len(self.recursions) >= 2 and not has_divide_conquer:
-            return ComplexityResult(
-                "O(2ⁿ)",
-                "The code has multiple recursive calls without dividing the input "
-                "(e.g., naive Fibonacci), resulting in O(2ⁿ) exponential time complexity.",
-                details,
-            )
 
         # Case 6: Logarithmic loop (while loop with halving/doubling)
         if self.has_log_pattern and self.max_loop_depth == 1:
@@ -446,9 +446,13 @@ class RegexAnalyzer:
     def _check_divide_conquer(self, code, recursions):
         if not recursions:
             return False
-        dc_patterns = ["mid", "low", "high", "left", "right", "lo", "hi", "/ 2"]
+        # Use regex for word boundaries to avoid matching "hi" in "fibonacci"
+        dc_patterns = [
+            r"\bmid\b", r"\blow\b", r"\bhigh\b", r"\bleft\b", r"\bright\b",
+            r"\blo\b", r"\bhi\b", r"/\s*2"
+        ]
         code_lower = code.lower()
-        return any(p in code_lower for p in dc_patterns)
+        return any(re.search(p, code_lower) for p in dc_patterns)
 
     def _determine_complexity(self, details):
         loops = details["loops_found"]
@@ -481,20 +485,20 @@ class RegexAnalyzer:
                     details,
                 )
 
-        if recursions >= 1 and not has_dc:
-            if depth == 0:
-                return ComplexityResult(
-                    "O(n)",
-                    "Linear recursion detected (one recursive call per step without halving).",
-                    details,
-                )
-
         if recursions >= 2 and not has_dc:
             return ComplexityResult(
                 "O(2ⁿ)",
                 "Multiple recursive calls without divide-and-conquer pattern → exponential.",
                 details,
             )
+
+        if recursions == 1 and not has_dc:
+            if depth == 0:
+                return ComplexityResult(
+                    "O(n)",
+                    "Linear recursion detected (one recursive call per step without halving).",
+                    details,
+                )
 
         if has_log and depth == 1:
             return ComplexityResult(
@@ -536,38 +540,79 @@ class RegexAnalyzer:
         )
 
 
+# ─── Complexity Profiles ──────────────────────────────────────────────────
+
+COMPLEXITY_PROFILES = {
+    "O(1)": {
+        "verdict": "The algorithm executes a constant number of operations regardless of input size.",
+        "scaling": "Doubling the input size (n → 2n) has NO impact on execution time.",
+        "tips": "Excellent! Constant time is the gold standard of performance. No further optimization needed."
+    },
+    "O(log n)": {
+        "verdict": "The algorithm's work grows logarithmically, usually by halving the search space in each step.",
+        "scaling": "Doubling the input (n → 2n) only adds ONE additional step to the execution.",
+        "tips": "Consider using this pattern (like Binary Search) whenever you have sorted data."
+    },
+    "O(n)": {
+        "verdict": "The work scales linearly; every element in the input is processed once.",
+        "scaling": "Doubling the input (n → 2n) exactly DOUBLES the execution time.",
+        "tips": "To optimize O(n), try to eliminate redundant work inside the loop or use specialized data structures (like HashMaps) for O(1) lookups."
+    },
+    "O(n log n)": {
+        "verdict": "Typical of efficient sorting algorithms and divide-and-conquer strategies.",
+        "scaling": "Doubling the input (n → 2n) slightly more than doubles the time (roughly 2.1x).",
+        "tips": "This is generally the best efficiency possible for comparison-based sorting."
+    },
+    "O(n²)": {
+        "verdict": "The work scales quadratically, usually due to nested loops over the same input.",
+        "scaling": "Doubling the input (n → 2n) makes the algorithm 4 TIMES slower.",
+        "tips": "Look for ways to replace nested loops with a single loop and a dictionary/set for faster lookups."
+    },
+    "O(n³)": {
+        "verdict": "Cubic growth, often found in matrix operations or triple-nested loops.",
+        "scaling": "Doubling the input (n → 2n) makes the algorithm 8 TIMES slower.",
+        "tips": "Serious optimization required for large datasets. Consider using optimized libraries like NumPy for matrix math."
+    },
+    "O(2ⁿ)": {
+        "verdict": "Exponential growth. The number of operations doubles with every single new element.",
+        "scaling": "Adding just 10 elements to your input makes it 1024 TIMES slower!",
+        "tips": "Use Memoization or Dynamic Programming to cache results and potentially reduce this to O(n) or O(n²)."
+    }
+}
+
+
 # ─── Main API Function ───────────────────────────────────────────────────────
 
 # All supported languages
-SUPPORTED_LANGUAGES = {"python", "java", "cpp", "c++", "c", "javascript", "go", "ruby", "rust"}
+SUPPORTED_LANGUAGES = {"python", "java", "cpp", "c++", "c", "javascript", "go", "ruby", "rust", "kotlin", "xml"}
 
 
 def analyze_code(source_code, language="python"):
     """
     Analyze source code and return complexity estimation.
-    Supported languages: python, java, cpp, javascript, go, ruby, rust
     """
     language = language.lower().strip()
 
     if not source_code or not source_code.strip():
-        return ComplexityResult(
-            "N/A",
-            "No code provided. Please paste some code to analyze.",
-            {},
-        )
+        return ComplexityResult("N/A", "No code provided.", {})
 
     if language == "python":
-        analyzer = PythonAnalyzer(source_code)
+        res = PythonAnalyzer(source_code).analyze()
     elif language in SUPPORTED_LANGUAGES:
-        analyzer = RegexAnalyzer(source_code, language)
+        res = RegexAnalyzer(source_code, language).analyze()
     else:
-        return ComplexityResult(
-            "N/A",
-            f"Unsupported language: {language}. Supported: python, java, cpp, javascript, go, ruby, rust.",
-            {},
-        )
+        return ComplexityResult("N/A", f"Unsupported language: {language}", {})
 
-    return analyzer.analyze()
+    # Add profile details if available
+    profile = COMPLEXITY_PROFILES.get(res.complexity)
+    if profile:
+        res.details.update({
+            "deep_verdict": profile["verdict"],
+            "scaling_info": profile["scaling"],
+            "optimization_tips": profile["tips"]
+        })
+
+    return res
 
 
 def compare_code(code1, lang1, code2, lang2):

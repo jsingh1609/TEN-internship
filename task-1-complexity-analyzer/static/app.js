@@ -20,23 +20,26 @@ const LANG_MODES = {
   go: 'text/x-go',
   ruby: 'text/x-ruby',
   rust: 'text/x-rustsrc',
+  kotlin: 'text/x-kotlin',
+  xml: 'xml'
 };
 
 // Language → file extension
 const LANG_EXT = {
   python: '.py', java: '.java', cpp: '.cpp',
   javascript: '.js', go: '.go', ruby: '.rb', rust: '.rs',
+  kotlin: '.kt', xml: '.xml'
 };
 
 // Complexity scale data
 const SCALE_DATA = [
   { key: 'o1', label: 'O(1)', height: 20, color: '#34d399' },
   { key: 'ologn', label: 'O(log n)', height: 40, color: '#06b6d4' },
-  { key: 'on', label: 'O(n)', height: 70, color: '#a78bfa' },
-  { key: 'onlogn', label: 'O(n log n)', height: 100, color: '#fbbf24' },
-  { key: 'on2', label: 'O(n²)', height: 140, color: '#fb923c' },
-  { key: 'on3', label: 'O(n³)', height: 180, color: '#f43f5e' },
-  { key: 'o2n', label: 'O(2ⁿ)', height: 220, color: '#ef4444' },
+  { key: 'on', label: 'O(n)', height: 75, color: '#a855f7' },
+  { key: 'onlogn', label: 'O(n log n)', height: 110, color: '#fbbf24' },
+  { key: 'on2', label: 'O(n²)', height: 160, color: '#fb923c' },
+  { key: 'on3', label: 'O(n³)', height: 210, color: '#f43f5e' },
+  { key: 'o2n', label: 'O(2ⁿ)', height: 270, color: '#ef4444' },
 ];
 
 // ─── Sample Code Snippets ────────────────────────────────────────────────────
@@ -116,6 +119,11 @@ def merge(left, right):
     if n <= 1:
         return n
     return fibonacci(n - 1) + fibonacci(n - 2)`,
+
+  'kotlin-linear':
+    `// Kotlin Linear\nfun main() {\n    val n = 10\n    for (i in 0 until n) {\n        println(i)\n    }\n}`,
+  'xml-constant':
+    `<!-- XML O(1) -->\n<config>\n    <setting id="1">Value</setting>\n    <setting id="2">Value</setting>\n</config>`
 };
 
 // ─── Initialization ──────────────────────────────────────────────────────────
@@ -123,7 +131,6 @@ def merge(left, right):
 document.addEventListener('DOMContentLoaded', () => {
   initEditors();
   initNavigation();
-  initTabs();
   renderComplexityScale();
 
   // Handle initial hash
@@ -177,6 +184,101 @@ function initEditors() {
   document.getElementById('compare-lang-2').addEventListener('change', (e) => {
     compareEditor2.setOption('mode', LANG_MODES[e.target.value] || 'python');
   });
+
+  // Init custom selects
+  initCustomSelects('language-select-wrapper', 'language-select', (lang) => {
+    editor.setOption('mode', LANG_MODES[lang] || 'python');
+    document.getElementById('editor-filename').textContent = 'main' + (LANG_EXT[lang] || '.py');
+    updateAnalyzeButton(lang);
+  });
+
+  initCustomSelects('compare-lang-1-wrapper', 'compare-lang-1', (lang) => {
+    compareEditor1.setOption('mode', LANG_MODES[lang] || 'python');
+  });
+
+  initCustomSelects('compare-lang-2-wrapper', 'compare-lang-2', (lang) => {
+    compareEditor2.setOption('mode', LANG_MODES[lang] || 'python');
+  });
+}
+
+// Language → Devicon class mapping
+const DEVICON_CLASSES = {
+  'python': 'devicon-python-plain',
+  'java': 'devicon-java-plain',
+  'cpp': 'devicon-cplusplus-plain',
+  'javascript': 'devicon-javascript-plain',
+  'go': 'devicon-go-original-wordmark',
+  'ruby': 'devicon-ruby-plain',
+  'rust': 'devicon-rust-plain',
+  'kotlin': 'devicon-kotlin-plain',
+  'xml': 'devicon-xml-plain'
+};
+
+function initCustomSelects(wrapperId, hiddenSelectId, onChange) {
+  const wrapper = document.getElementById(wrapperId);
+  if (!wrapper) return;
+
+  const btn = wrapper.querySelector('.custom-select-btn');
+  const dropdown = wrapper.querySelector('.custom-select-dropdown');
+  const options = wrapper.querySelectorAll('.custom-option');
+  const hiddenSelect = document.getElementById(hiddenSelectId);
+
+  // Toggle dropdown
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = wrapper.classList.contains('open');
+    closeAllCustomSelects();
+    if (!isOpen) wrapper.classList.add('open');
+  });
+
+  // Handle option selection
+  options.forEach(opt => {
+    opt.addEventListener('click', () => {
+      const val = opt.dataset.value;
+      const text = opt.textContent.trim();
+
+      // Update hidden select
+      hiddenSelect.value = val;
+
+      // Update UI
+      const nameEl = btn.querySelector('.lang-name');
+      const iconEl = btn.querySelector('.lang-icon');
+      if (nameEl) nameEl.textContent = text;
+      if (iconEl) {
+        iconEl.className = 'lang-icon ' + (DEVICON_CLASSES[val] || '');
+      }
+
+      // Update selected state
+      options.forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+
+      wrapper.classList.remove('open');
+
+      if (onChange) onChange(val);
+    });
+  });
+
+  // Set initial state
+  const initialOpt = wrapper.querySelector('.custom-option.selected') || options[0];
+  if (initialOpt) {
+    const val = initialOpt.dataset.value;
+    const iconEl = btn.querySelector('.lang-icon');
+    if (iconEl) iconEl.className = 'lang-icon ' + (DEVICON_CLASSES[val] || '');
+  }
+}
+
+function closeAllCustomSelects() {
+  document.querySelectorAll('.custom-select').forEach(s => s.classList.remove('open'));
+}
+
+// Close when clicking outside
+document.addEventListener('click', closeAllCustomSelects);
+
+function updateAnalyzeButton(lang) {
+  const icon = document.getElementById('analyze-lang-icon');
+  if (icon) {
+    icon.className = 'btn-lang-icon ' + (DEVICON_CLASSES[lang] || '');
+  }
 }
 
 // ─── Navigation (SPA Router) ────────────────────────────────────────────────
@@ -201,7 +303,7 @@ function initNavigation() {
   });
 }
 
-function navigateTo(page, tab, pushHash = true) {
+function navigateTo(page, subPage, pushHash = true) {
   // Update pages
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const targetPage = document.getElementById(`page-${page}`);
@@ -219,17 +321,15 @@ function navigateTo(page, tab, pushHash = true) {
     window.location.hash = page;
   }
 
-  // Refresh CodeMirror when switching to editor page
-  if (page === 'editor') {
+  // Refresh CodeMirror when switching to editor/compare page
+  if (page === 'editor' || page === 'compare') {
     setTimeout(() => {
-      editor && editor.refresh();
-      compareEditor1 && compareEditor1.refresh();
-      compareEditor2 && compareEditor2.refresh();
+      if (page === 'editor' && editor) editor.refresh();
+      if (page === 'compare') {
+        compareEditor1 && compareEditor1.refresh();
+        compareEditor2 && compareEditor2.refresh();
+      }
     }, 100);
-
-    if (tab === 'compare') {
-      switchTab('compare');
-    }
   }
 
   // Load history when switching to history page
@@ -238,42 +338,41 @@ function navigateTo(page, tab, pushHash = true) {
   }
 }
 
-// ─── Tabs ────────────────────────────────────────────────────────────────────
-
-function initTabs() {
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      switchTab(btn.dataset.tab);
-    });
-  });
-}
-
-function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-  const activeBtn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
-  const activeContent = document.getElementById(`tab-content-${tab}`);
-
-  if (activeBtn) activeBtn.classList.add('active');
-  if (activeContent) activeContent.classList.add('active');
-
-  // Refresh editors
-  setTimeout(() => {
-    editor && editor.refresh();
-    compareEditor1 && compareEditor1.refresh();
-    compareEditor2 && compareEditor2.refresh();
-  }, 50);
-}
 
 // ─── Load Sample Code ────────────────────────────────────────────────────────
 
 function loadSample(key) {
   if (SAMPLES[key]) {
-    editor.setValue(SAMPLES[key]);
-    document.getElementById('language-select').value = 'python';
-    editor.setOption('mode', 'python');
-    document.getElementById('editor-filename').textContent = 'main.py';
+    const isComparePage = document.getElementById('page-compare').classList.contains('active');
+    const targetEditor = isComparePage ? compareEditor1 : editor;
+    const langSelectId = isComparePage ? 'compare-lang-1' : 'language-select';
+    const wrapperId = isComparePage ? 'compare-lang-1-wrapper' : 'language-select-wrapper';
+    
+    targetEditor.setValue(SAMPLES[key]);
+    const lang = 'python';
+    document.getElementById(langSelectId).value = lang;
+    targetEditor.setOption('mode', 'python');
+    
+    if (!isComparePage) {
+      document.getElementById('editor-filename').textContent = 'main.py';
+    }
+
+    // Update custom select UI
+    const wrapper = document.getElementById(wrapperId);
+    const opts = wrapper.querySelectorAll('.custom-option');
+    opts.forEach(o => {
+      o.classList.remove('selected');
+      if (o.dataset.value === lang) o.classList.add('selected');
+    });
+    const btn = wrapper.querySelector('.custom-select-btn');
+    const nameEl = btn.querySelector('.lang-name');
+    if (nameEl) nameEl.textContent = 'Python';
+    const iconEl = btn.querySelector('.lang-icon');
+    if (iconEl) iconEl.className = 'lang-icon ' + DEVICON_CLASSES[lang];
+    
+    if (!isComparePage) {
+      updateAnalyzeButton(lang);
+    }
   }
 }
 
@@ -351,7 +450,7 @@ function getComplexityClass(complexity) {
 function renderComplexityScale() {
   const container = document.getElementById('complexity-scale');
   container.innerHTML = SCALE_DATA.map(item => `
-    <div class="scale-bar-wrapper" style="text-align:center;">
+    <div class="scale-bar-wrapper">
       <div class="scale-bar" data-key="${item.key}"
            style="height:${item.height}px; background:${item.color};">
       </div>
@@ -421,6 +520,28 @@ function renderDetails(details) {
         </ul>
       </div>
     ` : ''}
+
+    <!-- Deep Analysis Section -->
+    ${details.deep_verdict ? `
+      <div style="margin-top:var(--space-lg); padding-top:var(--space-md); border-top:1px solid var(--border-color);">
+        <h3 style="font-size:0.9rem; margin-bottom:var(--space-md); color:var(--accent-2);">🔍 Deep Analysis</h3>
+        
+        <div class="detail-row" style="flex-direction:column; align-items:flex-start; gap:4px;">
+          <span class="label" style="color:var(--text-secondary);">Final Verdict</span>
+          <p class="text-sm" style="color:var(--text-primary);">${details.deep_verdict}</p>
+        </div>
+
+        <div class="detail-row" style="flex-direction:column; align-items:flex-start; gap:4px; margin-top:var(--space-sm);">
+          <span class="label" style="color:var(--text-secondary);">Scaling Behavior</span>
+          <p class="text-sm" style="color:var(--text-primary);">${details.scaling_info}</p>
+        </div>
+
+        <div class="detail-row" style="flex-direction:column; align-items:flex-start; gap:4px; margin-top:var(--space-sm);">
+          <span class="label" style="color:var(--accent-1);">🚀 Optimization Tip</span>
+          <p class="text-sm" style="color:var(--text-primary); font-style:italic;">${details.optimization_tips}</p>
+        </div>
+      </div>
+    ` : ''}
   `;
 }
 
@@ -481,6 +602,37 @@ function displayCompareResult(result) {
 
   document.getElementById('compare-complexity-1').style.color = color1;
   document.getElementById('compare-complexity-2').style.color = color2;
+
+  // Render Deep Insights for both snippets
+  renderCompareDetails('compare-details-1', c1);
+  renderCompareDetails('compare-details-2', c2);
+}
+
+function renderCompareDetails(containerId, data) {
+  const container = document.getElementById(containerId);
+  const details = data.details || {};
+  
+  if (!details.deep_verdict) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="deep-analysis-mini">
+      <div class="mini-row">
+        <span class="mini-label">Verdict</span>
+        <p class="mini-text">${details.deep_verdict}</p>
+      </div>
+      <div class="mini-row">
+        <span class="mini-label">Scaling</span>
+        <p class="mini-text">${details.scaling_info}</p>
+      </div>
+      <div class="mini-row">
+        <span class="mini-label" style="color:var(--accent-1);">Tip</span>
+        <p class="mini-text" style="font-style:italic;">${details.optimization_tips}</p>
+      </div>
+    </div>
+  `;
 }
 
 // ─── History ─────────────────────────────────────────────────────────────────

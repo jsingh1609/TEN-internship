@@ -14,6 +14,7 @@
   <!-- CodeMirror CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
@@ -51,6 +52,7 @@
         <ul class="nav-links">
           <li><a class="nav-link active" data-page="home" id="nav-home">Home</a></li>
           <li><a class="nav-link" data-page="editor" id="nav-editor">Analyzer</a></li>
+          <li><a class="nav-link" data-page="compare" id="nav-compare">Compare</a></li>
           <li><a class="nav-link" data-page="history" id="nav-history">History</a></li>
         </ul>
       </div>
@@ -78,7 +80,7 @@
             <button class="btn btn-primary" id="cta-analyze" onclick="navigateTo('editor')">
               ⚡ Start Analyzing
             </button>
-            <button class="btn btn-secondary" onclick="navigateTo('editor', 'compare')">
+            <button class="btn btn-secondary" onclick="navigateTo('compare')">
               ⇄ Compare Code
             </button>
           </div>
@@ -106,8 +108,8 @@
           </div>
           <div class="feature-card">
             <div class="feature-icon">🌐</div>
-            <h3>7 Languages</h3>
-            <p>Supports Python, Java, C++, JavaScript, Go, Ruby, and Rust – covering all major programming paradigms.
+            <h3 class="gradient-text">9 Languages</h3>
+            <p>Supports Python, Java, C++, JavaScript, Go, Ruby, Rust, Kotlin, and XML – covering all major programming paradigms.
             </p>
           </div>
           <div class="feature-card">
@@ -133,16 +135,8 @@
           <h2>Code Analyzer</h2>
         </div>
 
-        <!-- Tab bar: Analyze / Compare -->
-        <div class="tab-bar">
-          <button class="tab-btn active" data-tab="analyze" id="tab-analyze">⚡ Analyze</button>
-          <button class="tab-btn" data-tab="compare" id="tab-compare">⇄ Compare</button>
-        </div>
-
-        <!-- ── TAB: Single Analysis ─────────────────────────────── -->
-        <div class="tab-content active" id="tab-content-analyze">
-          <div class="editor-layout">
-            <div>
+        <div class="editor-layout">
+          <div>
               <div class="editor-controls" style="margin-bottom: var(--space-md);">
                 <div class="custom-select" id="language-select-wrapper">
                   <button class="custom-select-btn" id="language-select-btn" type="button">
@@ -151,13 +145,15 @@
                     <span class="select-arrow">&#9662;</span>
                   </button>
                   <div class="custom-select-dropdown" id="language-dropdown">
-                    <div class="custom-option selected" data-value="python"><span class="lang-icon"></span> Python</div>
-                    <div class="custom-option" data-value="java"><span class="lang-icon"></span> Java</div>
-                    <div class="custom-option" data-value="cpp"><span class="lang-icon"></span> C++</div>
-                    <div class="custom-option" data-value="javascript"><span class="lang-icon"></span> JavaScript</div>
-                    <div class="custom-option" data-value="go"><span class="lang-icon"></span> Go</div>
-                    <div class="custom-option" data-value="ruby"><span class="lang-icon"></span> Ruby</div>
-                    <div class="custom-option" data-value="rust"><span class="lang-icon"></span> Rust</div>
+                    <div class="custom-option selected" data-value="python"><span class="lang-icon devicon-python-plain"></span> Python</div>
+                    <div class="custom-option" data-value="java"><span class="lang-icon devicon-java-plain"></span> Java</div>
+                    <div class="custom-option" data-value="cpp"><span class="lang-icon devicon-cplusplus-plain"></span> C++</div>
+                    <div class="custom-option" data-value="javascript"><span class="lang-icon devicon-javascript-plain"></span> JavaScript</div>
+                    <div class="custom-option" data-value="go"><span class="lang-icon devicon-go-original-wordmark"></span> Go</div>
+                    <div class="custom-option" data-value="ruby"><span class="lang-icon devicon-ruby-plain"></span> Ruby</div>
+                    <div class="custom-option" data-value="rust"><span class="lang-icon devicon-rust-plain"></span> Rust</div>
+                    <div class="custom-option" data-value="kotlin"><span class="lang-icon devicon-kotlin-plain"></span> Kotlin</div>
+                    <div class="custom-option" data-value="xml"><span class="lang-icon devicon-xml-plain"></span> XML</div>
                   </div>
                   <select id="language-select" style="display:none;">
                     <option value="python">Python</option>
@@ -167,23 +163,25 @@
                     <option value="go">Go</option>
                     <option value="ruby">Ruby</option>
                     <option value="rust">Rust</option>
+                    <option value="kotlin">Kotlin</option>
+                    <option value="xml">XML</option>
                   </select>
                 </div>
                 <button class="btn btn-primary btn-sm" id="btn-analyze" onclick="analyzeCode()">
-                  <span class="btn-lang-icon" id="analyze-lang-icon"></span> Analyze Complexity
+                  <span class="btn-lang-icon lang-icon-python" id="analyze-lang-icon"></span> Analyze Complexity
                 </button>
               </div>
 
               <div class="editor-panel">
                 <div class="editor-panel-header">
-                  <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                  <div class="dots"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></div>
                   <span class="filename" id="editor-filename">main.py</span>
                 </div>
                 <div id="code-editor"></div>
               </div>
 
-              <!-- Sample codes -->
-              <div class="sample-buttons">
+              <!-- Sample codes relocated here -->
+              <div class="sample-buttons" style="margin-top: 1.5rem;">
                 <span class="text-sm text-muted" style="margin-right: 4px;">Try:</span>
                 <button class="sample-btn" onclick="loadSample('o1')">O(1)</button>
                 <button class="sample-btn" onclick="loadSample('ologn')">O(log n)</button>
@@ -196,7 +194,7 @@
             </div>
 
             <!-- Result Panel -->
-            <div class="result-panel" id="result-panel">
+            <div class="result-panel" id="result-panel" style="margin-top: 2rem;">
               <div class="result-complexity">
                 <div class="result-label">Estimated Time Complexity</div>
                 <div class="complexity-badge" id="result-complexity-badge">O(n)</div>
@@ -218,12 +216,21 @@
             </div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <!-- ── TAB: Compare ─────────────────────────────────────── -->
-        <div class="tab-content" id="tab-content-compare">
-          <div class="compare-grid">
-            <div>
-              <div class="editor-controls" style="margin-bottom: var(--space-md);">
+    <!-- ══════════════════════════════════════════════════════════════
+         PAGE: COMPARE
+         ══════════════════════════════════════════════════════════════ -->
+    <section class="page" id="page-compare">
+      <div class="container">
+        <div class="editor-header">
+          <h2>Code Comparison</h2>
+        </div>
+        
+        <div class="compare-grid">
+          <div>
+            <div class="editor-controls" style="margin-bottom: var(--space-md);">
                 <div class="custom-select" id="compare-lang-1-wrapper">
                   <button class="custom-select-btn" id="compare-lang-1-btn" type="button">
                     <span class="lang-icon"></span>
@@ -231,21 +238,33 @@
                     <span class="select-arrow">&#9662;</span>
                   </button>
                   <div class="custom-select-dropdown" id="compare-lang-1-dropdown">
-                    <div class="custom-option selected" data-value="python"><span class="lang-icon"></span> Python</div>
-                    <div class="custom-option" data-value="java"><span class="lang-icon"></span> Java</div>
-                    <div class="custom-option" data-value="cpp"><span class="lang-icon"></span> C++</div>
-                    <div class="custom-option" data-value="javascript"><span class="lang-icon"></span> JavaScript</div>
-                    <div class="custom-option" data-value="go"><span class="lang-icon"></span> Go</div>
-                    <div class="custom-option" data-value="ruby"><span class="lang-icon"></span> Ruby</div>
-                    <div class="custom-option" data-value="rust"><span class="lang-icon"></span> Rust</div>
+                    <div class="custom-option selected" data-value="python"><span class="lang-icon devicon-python-plain"></span> Python</div>
+                    <div class="custom-option" data-value="java"><span class="lang-icon devicon-java-plain"></span> Java</div>
+                    <div class="custom-option" data-value="cpp"><span class="lang-icon devicon-cplusplus-plain"></span> C++</div>
+                    <div class="custom-option" data-value="javascript"><span class="lang-icon devicon-javascript-plain"></span> JavaScript</div>
+                    <div class="custom-option" data-value="go"><span class="lang-icon devicon-go-original-wordmark"></span> Go</div>
+                    <div class="custom-option" data-value="ruby"><span class="lang-icon devicon-ruby-plain"></span> Ruby</div>
+                    <div class="custom-option" data-value="rust"><span class="lang-icon devicon-rust-plain"></span> Rust</div>
+                    <div class="custom-option" data-value="kotlin"><span class="lang-icon devicon-kotlin-plain"></span> Kotlin</div>
+                    <div class="custom-option" data-value="xml"><span class="lang-icon devicon-xml-plain"></span> XML</div>
                   </div>
-                  <select id="compare-lang-1" style="display:none;"></select>
+                  <select id="compare-lang-1" style="display:none;">
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="cpp">C++</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="go">Go</option>
+                    <option value="ruby">Ruby</option>
+                    <option value="rust">Rust</option>
+                    <option value="kotlin">Kotlin</option>
+                    <option value="xml">XML</option>
+                  </select>
                 </div>
                 <span class="text-sm text-muted">Snippet 1</span>
               </div>
               <div class="editor-panel">
                 <div class="editor-panel-header">
-                  <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                  <div class="dots"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></div>
                   <span class="filename">snippet_1</span>
                 </div>
                 <div id="compare-editor-1"></div>
@@ -260,21 +279,33 @@
                     <span class="select-arrow">&#9662;</span>
                   </button>
                   <div class="custom-select-dropdown" id="compare-lang-2-dropdown">
-                    <div class="custom-option selected" data-value="python"><span class="lang-icon"></span> Python</div>
-                    <div class="custom-option" data-value="java"><span class="lang-icon"></span> Java</div>
-                    <div class="custom-option" data-value="cpp"><span class="lang-icon"></span> C++</div>
-                    <div class="custom-option" data-value="javascript"><span class="lang-icon"></span> JavaScript</div>
-                    <div class="custom-option" data-value="go"><span class="lang-icon"></span> Go</div>
-                    <div class="custom-option" data-value="ruby"><span class="lang-icon"></span> Ruby</div>
-                    <div class="custom-option" data-value="rust"><span class="lang-icon"></span> Rust</div>
+                    <div class="custom-option selected" data-value="python"><span class="lang-icon devicon-python-plain"></span> Python</div>
+                    <div class="custom-option" data-value="java"><span class="lang-icon devicon-java-plain"></span> Java</div>
+                    <div class="custom-option" data-value="cpp"><span class="lang-icon devicon-cplusplus-plain"></span> C++</div>
+                    <div class="custom-option" data-value="javascript"><span class="lang-icon devicon-javascript-plain"></span> JavaScript</div>
+                    <div class="custom-option" data-value="go"><span class="lang-icon devicon-go-original-wordmark"></span> Go</div>
+                    <div class="custom-option" data-value="ruby"><span class="lang-icon devicon-ruby-plain"></span> Ruby</div>
+                    <div class="custom-option" data-value="rust"><span class="lang-icon devicon-rust-plain"></span> Rust</div>
+                    <div class="custom-option" data-value="kotlin"><span class="lang-icon devicon-kotlin-plain"></span> Kotlin</div>
+                    <div class="custom-option" data-value="xml"><span class="lang-icon devicon-xml-plain"></span> XML</div>
                   </div>
-                  <select id="compare-lang-2" style="display:none;"></select>
+                  <select id="compare-lang-2" style="display:none;">
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="cpp">C++</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="go">Go</option>
+                    <option value="ruby">Ruby</option>
+                    <option value="rust">Rust</option>
+                    <option value="kotlin">Kotlin</option>
+                    <option value="xml">XML</option>
+                  </select>
                 </div>
                 <span class="text-sm text-muted">Snippet 2</span>
               </div>
               <div class="editor-panel">
                 <div class="editor-panel-header">
-                  <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                  <div class="dots"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></div>
                   <span class="filename">snippet_2</span>
                 </div>
                 <div id="compare-editor-2"></div>
@@ -287,21 +318,23 @@
               </button>
             </div>
 
+
             <!-- Compare Results -->
             <div class="compare-result-card" id="compare-result-1" style="display:none;">
               <h4>Snippet 1</h4>
               <div class="complexity-value" id="compare-complexity-1"></div>
               <p id="compare-explanation-1"></p>
+              <div id="compare-details-1" class="compare-details-box"></div>
             </div>
             <div class="compare-result-card" id="compare-result-2" style="display:none;">
               <h4>Snippet 2</h4>
               <div class="complexity-value" id="compare-complexity-2"></div>
               <p id="compare-explanation-2"></p>
+              <div id="compare-details-2" class="compare-details-box"></div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
     <!-- ══════════════════════════════════════════════════════════════
          PAGE: HISTORY
