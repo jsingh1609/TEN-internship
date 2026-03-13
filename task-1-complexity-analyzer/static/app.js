@@ -5,6 +5,17 @@
 
 // ─── Globals ─────────────────────────────────────────────────────────────────
 
+const COMPLEXITY_RANK = {
+  'O(1)': 0,
+  'O(log n)': 1,
+  'O(n)': 2,
+  'O(n log n)': 3,
+  'O(n²)': 4,
+  'O(n³)': 5,
+  'O(2ⁿ)': 6,
+  'N/A': 100
+};
+
 let editor = null;
 let compareEditor1 = null;
 let compareEditor2 = null;
@@ -606,6 +617,69 @@ function displayCompareResult(result) {
   // Render Deep Insights for both snippets
   renderCompareDetails('compare-details-1', c1);
   renderCompareDetails('compare-details-2', c2);
+
+  // Generate Master Verdict
+  const lang1 = document.getElementById('compare-lang-1').value;
+  const lang2 = document.getElementById('compare-lang-2').value;
+  displayMasterVerdict(c1, lang1, c2, lang2);
+}
+
+function displayMasterVerdict(res1, lang1, res2, lang2) {
+  const verdictBox = document.getElementById('compare-master-verdict');
+  verdictBox.style.display = 'block';
+
+  const rank1 = COMPLEXITY_RANK[res1.complexity] ?? 99;
+  const rank2 = COMPLEXITY_RANK[res2.complexity] ?? 99;
+
+  let title = '';
+  let advice = '';
+  let badgeClass = '';
+
+  if (rank1 < rank2) {
+    title = '🏆 Snippet 1 is more efficient!';
+    advice = `With ${res1.complexity} complexity, Snippet 1 will scale significantly better than Snippet 2 (${res2.complexity}) as input sizes grow.`;
+    badgeClass = 'winner-1';
+  } else if (rank2 < rank1) {
+    title = '🏆 Snippet 2 is more efficient!';
+    advice = `Snippet 2 wins with ${res2.complexity} complexity compared to Snippet 1's ${res1.complexity}. Use Snippet 2 for production workloads.`;
+    badgeClass = 'winner-2';
+  } else {
+    // Both same complexity
+    title = "🤝 It's an Efficiency Tie!";
+    if (lang1 === lang2) {
+      advice = `Both implementations share O(${res1.complexity}) complexity. Choose the code that is more readable or maintainable.`;
+    } else {
+      // Different languages
+      advice = getLanguageAdvice(lang1, lang2);
+    }
+    badgeClass = 'tie';
+  }
+
+  verdictBox.innerHTML = `
+    <div class="verdict-content ${badgeClass}">
+      <h3>${title}</h3>
+      <p>${advice}</p>
+    </div>
+  `;
+}
+
+function getLanguageAdvice(l1, l2) {
+  const tips = {
+    'python': 'great for rapid prototyping and AI/Data Science.',
+    'cpp': 'highly optimized for performance and large-scale systems.',
+    'java': 'excellent for enterprise-level, secure, and cross-platform apps.',
+    'javascript': 'the standard for web and real-time interactive apps.',
+    'go': 'built for concurrency and scalable cloud services.',
+    'rust': 'guarantees memory safety and high performance.',
+    'ruby': 'optimized for developer happiness and web productivity.',
+    'kotlin': 'modern, expressive, and the first choice for Android development.',
+    'xml': 'ideal for structured data exchange and configuration.'
+  };
+
+  const name1 = l1.charAt(0).toUpperCase() + l1.slice(1);
+  const name2 = l2.charAt(0).toUpperCase() + l2.slice(1);
+  
+  return `Both have the same complexity, but use **${name1}** if you need it for ${tips[l1] || 'general use'} whereas **${name2}** is ${tips[l2] || 'also a great choice'}.`;
 }
 
 function renderCompareDetails(containerId, data) {
