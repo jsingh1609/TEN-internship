@@ -639,10 +639,12 @@ function displayMasterVerdict(res1, lang1, res2, lang2) {
     title = '🏆 Snippet 1 is more efficient!';
     advice = `With ${res1.complexity} complexity, Snippet 1 will scale significantly better than Snippet 2 (${res2.complexity}) as input sizes grow.`;
     badgeClass = 'winner-1';
+    if (lang1 !== lang2) advice += `<br><br>${getLanguageAdvice(lang1, lang2, true)}`;
   } else if (rank2 < rank1) {
     title = '🏆 Snippet 2 is more efficient!';
     advice = `Snippet 2 wins with ${res2.complexity} complexity compared to Snippet 1's ${res1.complexity}. Use Snippet 2 for production workloads.`;
     badgeClass = 'winner-2';
+    if (lang1 !== lang2) advice += `<br><br>${getLanguageAdvice(lang1, lang2, true)}`;
   } else {
     // Both same complexity
     title = "🤝 It's an Efficiency Tie!";
@@ -650,7 +652,7 @@ function displayMasterVerdict(res1, lang1, res2, lang2) {
       advice = `Both implementations share ${res1.complexity} complexity. Choose the code that is more readable or maintainable.`;
     } else {
       // Different languages
-      advice = getLanguageAdvice(lang1, lang2);
+      advice = getLanguageAdvice(lang1, lang2, false);
     }
     badgeClass = 'tie';
   }
@@ -663,7 +665,7 @@ function displayMasterVerdict(res1, lang1, res2, lang2) {
   `;
 }
 
-function getLanguageAdvice(l1, l2) {
+function getLanguageAdvice(l1, l2, hasWinner) {
   const tips = {
     'python': 'great for rapid prototyping and AI/Data Science.',
     'cpp': 'highly optimized for performance and large-scale systems.',
@@ -678,6 +680,10 @@ function getLanguageAdvice(l1, l2) {
 
   const name1 = l1.charAt(0).toUpperCase() + l1.slice(1);
   const name2 = l2.charAt(0).toUpperCase() + l2.slice(1);
+  
+  if (hasWinner) {
+    return `**Language Context:** Note that **${name1}** is ${tips[l1] || 'valuable'} while **${name2}** is ${tips[l2] || 'also useful'}.`;
+  }
   
   return `Both have the same complexity, but use **${name1}** if you need it for ${tips[l1] || 'general use'} whereas **${name2}** is ${tips[l2] || 'also a great choice'}.`;
 }
