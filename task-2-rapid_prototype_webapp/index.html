@@ -169,6 +169,7 @@
         </div>
 
         <button class="clear-btn" onclick="clearCompleted()">🗑 Clear Completed</button>
+        <button class="clear-btn history-btn" onclick="openHistory()">📋 Task History</button>
       </aside>
 
       <!-- MAIN -->
@@ -211,6 +212,13 @@
             <button class="add-btn" onclick="addTask()">
               Add Task <span class="add-enter">↵</span>
             </button>
+          </div>
+          <!-- Notification row — shows only when High is selected -->
+          <div class="notif-row hidden" id="notif-row">
+            <span class="notif-icon">🔔</span>
+            <span class="notif-lbl">Remind me at:</span>
+            <input type="datetime-local" id="notif-time" class="notif-time-input" />
+            <span class="notif-hint">High priority — browser notification will fire at this time</span>
           </div>
         </div>
 
@@ -297,7 +305,7 @@
         <a href="#app-sec">Planner</a>
       </div>
       <p class="footer-copy">Built with ♥ for the Vibe Coding Internship</p>
-      <p class="footer-author">— Jasjeet Singh Babra</p>
+      <p class="footer-author">— Jasjeet Singh</p>
     </div>
   </footer>
 
@@ -320,6 +328,24 @@
         <button class="btn-save" onclick="saveEdit()">Save Changes</button>
       </div>
     </div>
+  </div>
+
+  <!-- ░░ HISTORY MODAL ░░ -->
+  <div id="history-overlay" class="modal-overlay hidden" onclick="closeHistory(event)">
+    <div class="modal-box history-modal" onclick="event.stopPropagation()">
+      <div class="modal-hdr">
+        <h3>📋 Task History</h3>
+        <button class="modal-x" onclick="closeHistory()">✕</button>
+      </div>
+      <div class="history-timeline" id="history-timeline"></div>
+    </div>
+  </div>
+
+  <!-- ░░ NOTIF PERMISSION BANNER ░░ -->
+  <div id="notif-banner" class="notif-banner hidden">
+    <span>🔔 Enable browser notifications to get reminders for high priority tasks</span>
+    <button onclick="requestNotifPermission()">Allow Notifications</button>
+    <button class="notif-dismiss" onclick="dismissNotifBanner()">✕</button>
   </div>
 
   <script src="app.js"></script>
