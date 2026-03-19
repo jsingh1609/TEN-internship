@@ -14,36 +14,6 @@ A beautifully designed, fully functional **Task Manager Web App** built as a rap
 
 ---
 
-## 📸 Screenshots
-
-> 🌐 Deployed on Vercel — [taskflow-jasjeet.vercel.app](https://taskflow-jasjeet.vercel.app)
-
-### 🏠 Hero — Full-screen gradient with badge & title
-![Hero Section](images/hero.png)
-
-### 📊 Hero — Live stat cards & CTA buttons
-![Hero Stats](images/hero-stats.png)
-
-### ⚡ Features — Top row (Instant Add · Priority · Auto Saved)
-![Features Top](images/features-top.png)
-
-### 🔍 Features — Bottom row (Search · Edit · Progress)
-![Features Bottom](images/features-bottom.png)
-
-### 🗂️ Planner — Workspace with sidebar & add task input
-![Planner Top](images/planner-top.png)
-
-### 📋 Planner — Sidebar filters, priority & progress bar
-![Planner Sidebar](images/planner-sidebar.png)
-
-### 💬 Quotes — Auto-scrolling carousel with arrows & dots
-![Quote Carousel](images/quotes.png)
-
-### 🦶 Footer — Brand, tagline & navigation
-![Footer](images/footer.png)
-
----
-
 ## ✨ Features
 
 ### Core Task Management
