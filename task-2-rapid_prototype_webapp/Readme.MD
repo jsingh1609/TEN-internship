@@ -81,16 +81,7 @@ task-2-rapid_prototype_webapp/
 ├── style.css               ← All styles, animations & responsive rules
 ├── app.js                  ← Complete app logic (tasks + carousel)
 ├── README.md               ← This file
-│
-└── images/                 ← Add your screenshots here before pushing
-    ├── hero.png
-    ├── hero-stats.png
-    ├── features-top.png
-    ├── features-bottom.png
-    ├── planner-top.png
-    ├── planner-sidebar.png
-    ├── quotes.png
-    └── footer.png
+
 ```
 
 ### File Breakdown
