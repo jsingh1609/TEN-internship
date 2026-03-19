@@ -10,33 +10,43 @@ A beautifully designed, fully functional **Task Manager Web App** built as a rap
 
 > Open `index.html` in any modern browser — no server, no installation, no sign-up required.
 
+🔗 **GitHub Repo:** [github.com/jsingh1609/TEN-internship](https://github.com/jsingh1609/TEN-internship/tree/main/task-2-rapid_prototype_webapp)
+
 ---
 
 ## 📸 Screenshots
 
+> 📂 Place your screenshots inside an `images/` folder in the same directory as this README, then push to GitHub. The images will render automatically.
+
 ### 🏠 Hero — Full-screen gradient with badge & title
-![Hero Section]("C:\Users\DELL\OneDrive\Pictures\Screenshots\Screenshot 2026-03-19 133308.png")
+![Hero Section](images/hero.png)
 
 ### 📊 Hero — Live stat cards & CTA buttons
-![Hero Stats]("C:\Users\DELL\OneDrive\Pictures\Screenshots\Screenshot 2026-03-19 133332.png")
+![Hero Stats](images/hero-stats.png)
 
 ### ⚡ Features — Top row (Instant Add · Priority · Auto Saved)
-![Features Top]("C:\Users\DELL\OneDrive\Pictures\Screenshots\Screenshot 2026-03-19 133356.png")
+![Features Top](images/features-top.png)
 
 ### 🔍 Features — Bottom row (Search · Edit · Progress)
-![Features Bottom]("C:\Users\DELL\OneDrive\Pictures\Screenshots\Screenshot 2026-03-19 133414.png")
+![Features Bottom](images/features-bottom.png)
 
 ### 🗂️ Planner — Workspace with sidebar & add task input
-![Planner Top]("C:\Users\DELL\OneDrive\Pictures\Screenshots\Screenshot 2026-03-19 133436.png")
+![Planner Top](images/planner-top.png)
 
 ### 📋 Planner — Sidebar filters, priority & progress bar
-![Planner Sidebar]("C:\Users\DELL\OneDrive\Pictures\Screenshots\Screenshot 2026-03-19 133506.png")
+![Planner Sidebar](images/planner-sidebar.png)
 
 ### 💬 Quotes — Auto-scrolling carousel with arrows & dots
-![Quote Carousel]("C:\Users\DELL\OneDrive\Pictures\Screenshots\Screenshot 2026-03-19 133525.png")
+![Quote Carousel](images/quotes.png)
 
 ### 🦶 Footer — Brand, tagline & navigation
-![Footer]("C:\Users\DELL\OneDrive\Pictures\Screenshots\Screenshot 2026-03-19 133506.png")
+![Footer](images/footer.png)
+
+> ✅ **How to add screenshots correctly:**
+> 1. Take screenshots of your running app
+> 2. Save them with these exact filenames inside an `images/` folder
+> 3. Run `git add images/` then `git commit` and `git push`
+> 4. GitHub will render them here automatically
 
 ---
 
@@ -59,7 +69,7 @@ A beautifully designed, fully functional **Task Manager Web App** built as a rap
 - ✅ **Priority levels** — Low 🟢 · Medium 🟡 · High 🔴 with colour-coded left border & badges
 - ✅ **Live progress bar** — completion percentage updates in real time
 - ✅ **Toast notifications** — instant feedback on every action
-- ✅ **Quote carousel** — 5 motivational quotes with left-to-right scroll animation, prev/next arrows & dot indicators (auto-plays every 4.5s)
+- ✅ **Quote carousel** — 5 motivational quotes with left-to-right scroll, prev/next arrows & dot indicators (auto-plays every 4.5s)
 - ✅ **Floating hero stat cards** — total tasks, completed count & progress % live in the hero
 - ✅ **Responsive design** — works on mobile, tablet, and desktop
 - ✅ **Keyboard shortcuts** — power-user speed navigation
@@ -101,22 +111,22 @@ A beautifully designed, fully functional **Task Manager Web App** built as a rap
 ## 📁 Project Structure
 
 ```
-taskflow/
+task-2-rapid_prototype_webapp/
 │
 ├── index.html              ← Full page structure & all HTML sections
 ├── style.css               ← All styles, animations & responsive rules
 ├── app.js                  ← Complete app logic (tasks + carousel)
 ├── README.md               ← This file
 │
-└── screenshots/
-    ├── hero.png            ← Hero section — title & badge
-    ├── hero-stats.png      ← Hero — stat cards & CTA
-    ├── features-top.png    ← Features grid — row 1
-    ├── features-bottom.png ← Features grid — row 2
-    ├── planner-top.png     ← App workspace — add task area
-    ├── planner-sidebar.png ← App workspace — sidebar & progress
-    ├── quotes.png          ← Quote carousel
-    └── footer.png          ← Footer section
+└── images/                 ← Add your screenshots here before pushing
+    ├── hero.png
+    ├── hero-stats.png
+    ├── features-top.png
+    ├── features-bottom.png
+    ├── planner-top.png
+    ├── planner-sidebar.png
+    ├── quotes.png
+    └── footer.png
 ```
 
 ### File Breakdown
@@ -127,7 +137,7 @@ taskflow/
 - 6-card features grid with hover animations
 - Full app shell — sidebar filters + main workspace with search & sort
 - Quote carousel (5 slides, arrows, dot indicators)
-- Footer with navigation links
+- Footer with navigation links + author name
 - Edit task modal with priority pills
 
 **`style.css`**
@@ -160,12 +170,18 @@ taskflow/
 3. Done ✓
 ```
 
-### Option 2 — Clone from GitHub
+### Option 2 — Clone only this folder from GitHub (sparse checkout)
 ```bash
-git clone https://github.com/YOUR_USERNAME/taskflow-app.git
-cd taskflow-app
+git clone --no-checkout https://github.com/jsingh1609/TEN-internship.git
+cd TEN-internship
+git sparse-checkout init --cone
+git sparse-checkout set task-2-rapid_prototype_webapp
+git checkout main
+cd task-2-rapid_prototype_webapp
 # open index.html in your browser
 ```
+
+> 💡 This uses **sparse checkout** to download only the `task-2-rapid_prototype_webapp` folder, skipping all other folders in the repo.
 
 ### Option 3 — VS Code Live Server
 ```
@@ -174,7 +190,7 @@ cd taskflow-app
 3. Browser opens automatically at localhost:5500
 ```
 
-> ⚠️ All files must be in the **same folder** for CSS and JS to load correctly.
+> ⚠️ All files (`index.html`, `style.css`, `app.js`) must be in the **same folder** for the app to work correctly.
 
 ---
 
@@ -208,9 +224,9 @@ The UI aesthetic is directly inspired by the **India Travel Website** (`webtech-
 | Focus on functionality | ✅ Done | All CRUD + extras working |
 | Simple and clean code | ✅ Done | Separated HTML / CSS / JS |
 | Working prototype | ✅ Done | Runs locally, zero errors |
-| Source code on GitHub | ⬜ Pending | Push to your repo |
+| Source code on GitHub | ✅ Done | [View Repo](https://github.com/jsingh1609/TEN-internship/tree/main/task-2-rapid_prototype_webapp) |
 | Short README | ✅ Done | This file |
-| Screenshots | ✅ Done | 8 screenshots in `/screenshots` |
+| Screenshots | ✅ Done | 8 screenshots in `/images` folder |
 | Installation instructions | ✅ Done | 3 options above |
 
 ---
@@ -222,6 +238,7 @@ The UI aesthetic is directly inspired by the **India Travel Website** (`webtech-
 Made with ♥ using pure HTML, CSS, and JavaScript. No frameworks. No dependencies.
 
 **Jasjeet Singh**
+🔗 [github.com/jsingh1609](https://github.com/jsingh1609)
 
 ---
 
