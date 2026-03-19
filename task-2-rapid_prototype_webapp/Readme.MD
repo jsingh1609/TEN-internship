@@ -14,6 +14,36 @@ A beautifully designed, fully functional **Task Manager Web App** built as a rap
 
 ---
 
+## 📸 Screenshots
+
+> 🌐 Deployed on Vercel — [taskflow-jasjeet.vercel.app](https://taskflow-jasjeet.vercel.app)
+
+### 🏠 Hero — Full-screen gradient with badge & title
+![Hero Section](images/hero.png)
+
+### 📊 Hero — Live stat cards & CTA buttons
+![Hero Stats](images/hero-stats.png)
+
+### ⚡ Features — Top row (Instant Add · Priority · Auto Saved)
+![Features Top](images/features-top.png)
+
+### 🔍 Features — Bottom row (Search · Edit · Progress)
+![Features Bottom](images/features-bottom.png)
+
+### 🗂️ Planner — Workspace with sidebar & add task input
+![Planner Top](images/planner-top.png)
+
+### 📋 Planner — Sidebar filters, priority & progress bar
+![Planner Sidebar](images/planner-sidebar.png)
+
+### 💬 Quotes — Auto-scrolling carousel with arrows & dots
+![Quote Carousel](images/quotes.png)
+
+### 🦶 Footer — Brand, tagline & navigation
+![Footer](images/footer.png)
+
+---
+
 ## ✨ Features
 
 ### Core Task Management
@@ -29,6 +59,20 @@ A beautifully designed, fully functional **Task Manager Web App** built as a rap
 - ✅ **Search tasks** — real-time search as you type
 - ✅ **Sort tasks** — Newest / Oldest / By Priority / A–Z
 
+### 📋 Task History
+- ✅ **Full activity timeline** — every action logged with date & time
+- ✅ **Colour-coded events** — Added 🟠 · Completed 🟢 · Edited 🟡 · Deleted 🔴 · Undone ⚪
+- ✅ **Added & completed timestamps** — shown directly on each task card
+- ✅ **Persistent history** — stored in LocalStorage, survives page refresh
+- ✅ **Last 100 events** tracked and displayed in a beautiful timeline modal
+
+### 🔔 High Priority Notifications
+- ✅ **Reminder time picker** — appears automatically when High priority is selected
+- ✅ **Browser push notifications** — fires at the exact date & time you set
+- ✅ **Permission banner** — smooth prompt to enable notifications on first use
+- ✅ **Notification badge** — purple 🔔 tag shown on task card with scheduled time
+- ✅ **Auto re-scheduled on reload** — reminders survive page refresh
+
 ### UI & UX
 - ✅ **Priority levels** — Low 🟢 · Medium 🟡 · High 🔴 with colour-coded left border & badges
 - ✅ **Live progress bar** — completion percentage updates in real time
@@ -39,7 +83,7 @@ A beautifully designed, fully functional **Task Manager Web App** built as a rap
 - ✅ **Keyboard shortcuts** — power-user speed navigation
 
 ### Data
-- ✅ **LocalStorage persistence** — tasks survive page refresh and browser close
+- ✅ **LocalStorage persistence** — tasks & history survive page refresh and browser close
 - ✅ **No backend needed** — 100% client-side, fully private
 - ✅ **No frameworks** — pure HTML, CSS, and JavaScript only
 
@@ -50,7 +94,7 @@ A beautifully designed, fully functional **Task Manager Web App** built as a rap
 | Shortcut | Action |
 |----------|--------|
 | `Enter` | Add task / Save edit |
-| `Esc` | Close modal |
+| `Esc` | Close modal / History |
 | `⌘ K` / `Ctrl K` | Scroll to task input & focus |
 | `⌘ 1` / `Ctrl 1` | Switch to All Tasks view |
 | `⌘ 2` / `Ctrl 2` | Switch to Active Tasks view |
@@ -81,7 +125,16 @@ task-2-rapid_prototype_webapp/
 ├── style.css               ← All styles, animations & responsive rules
 ├── app.js                  ← Complete app logic (tasks + carousel)
 ├── README.md               ← This file
-
+│
+└── images/                 ← Add your screenshots here before pushing
+    ├── hero.png
+    ├── hero-stats.png
+    ├── features-top.png
+    ├── features-bottom.png
+    ├── planner-top.png
+    ├── planner-sidebar.png
+    ├── quotes.png
+    └── footer.png
 ```
 
 ### File Breakdown
@@ -91,9 +144,12 @@ task-2-rapid_prototype_webapp/
 - Hero section with floating live stat cards (Total / Completed / Progress)
 - 6-card features grid with hover animations
 - Full app shell — sidebar filters + main workspace with search & sort
+- **Notification reminder row** — slides in when High priority is selected
+- **Notification permission banner** — prompts user to allow browser notifications
 - Quote carousel (5 slides, arrows, dot indicators)
 - Footer with navigation links + author name
 - Edit task modal with priority pills
+- **Task History modal** — full timeline of all task activity
 
 **`style.css`**
 - CSS custom properties (full design token system)
@@ -101,6 +157,8 @@ task-2-rapid_prototype_webapp/
 - Animations: `fadeUp`, `taskIn`, `float`, `pulse`, `bob`, `spin`, `blink`, `toastIn/Out`
 - Hero: layered radial gradient mesh + diagonal grid pattern (no external images)
 - Glassmorphism cards, backdrop blur, gradient buttons
+- **History timeline styles** — colour-coded dots, connecting lines, action labels
+- **Notification row styles** — red-tinted reminder input, datetime picker
 - Mobile-first responsive breakpoints at 900px and 580px
 
 **`app.js`**
@@ -110,6 +168,8 @@ task-2-rapid_prototype_webapp/
 - Live filter (All / Active / Completed / High / Medium / Low)
 - Real-time search + 4-way sort (Newest / Oldest / Priority / A–Z)
 - Toast notification system with auto-dismiss
+- **Task History** — logs every action (added / done / undone / edited / deleted / notif) with timestamp, stores last 100 events in LocalStorage
+- **Browser Notifications** — schedules push notifications at user-set datetime for High priority tasks, re-schedules on page reload
 - Quote carousel — auto-play timer, arrow navigation, dot indicators, timer reset on interaction
 - Global keyboard shortcut handler
 - Navbar scroll shadow effect
@@ -184,6 +244,8 @@ The UI aesthetic is directly inspired by the **India Travel Website** (`webtech-
 | Short README | ✅ Done | This file |
 | Screenshots | ✅ Done | 8 screenshots in `/images` folder |
 | Installation instructions | ✅ Done | 3 options above |
+| **Task History** | ✅ Bonus | Full timeline — added, done, edited, deleted |
+| **Browser Notifications** | ✅ Bonus | High priority reminders at user-set time |
 
 ---
 
