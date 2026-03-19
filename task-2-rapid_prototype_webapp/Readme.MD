@@ -8,7 +8,7 @@ A beautifully designed, fully functional **Task Manager Web App** built as a rap
 
 ## 🌐 Live Preview
 
-> Open `index.html` in any modern browser — no server, no installation, no sign-up required.
+🔗 **Live Site:** [taskflow-jasjeet.vercel.app](https://taskflow-jasjeet.vercel.app)
 
 🔗 **GitHub Repo:** [github.com/jsingh1609/TEN-internship](https://github.com/jsingh1609/TEN-internship/tree/main/task-2-rapid_prototype_webapp)
 
@@ -16,7 +16,7 @@ A beautifully designed, fully functional **Task Manager Web App** built as a rap
 
 ## 📸 Screenshots
 
-> 📂 Place your screenshots inside an `images/` folder in the same directory as this README, then push to GitHub. The images will render automatically.
+> 🌐 Deployed on Vercel — [taskflow-jasjeet.vercel.app](https://taskflow-jasjeet.vercel.app)
 
 ### 🏠 Hero — Full-screen gradient with badge & title
 ![Hero Section](images/hero.png)
@@ -41,12 +41,6 @@ A beautifully designed, fully functional **Task Manager Web App** built as a rap
 
 ### 🦶 Footer — Brand, tagline & navigation
 ![Footer](images/footer.png)
-
-> ✅ **How to add screenshots correctly:**
-> 1. Take screenshots of your running app
-> 2. Save them with these exact filenames inside an `images/` folder
-> 3. Run `git add images/` then `git commit` and `git push`
-> 4. GitHub will render them here automatically
 
 ---
 
@@ -225,6 +219,7 @@ The UI aesthetic is directly inspired by the **India Travel Website** (`webtech-
 | Simple and clean code | ✅ Done | Separated HTML / CSS / JS |
 | Working prototype | ✅ Done | Runs locally, zero errors |
 | Source code on GitHub | ✅ Done | [View Repo](https://github.com/jsingh1609/TEN-internship/tree/main/task-2-rapid_prototype_webapp) |
+| Deployed & Live | ✅ Done | [taskflow-jasjeet.vercel.app](https://taskflow-jasjeet.vercel.app) |
 | Short README | ✅ Done | This file |
 | Screenshots | ✅ Done | 8 screenshots in `/images` folder |
 | Installation instructions | ✅ Done | 3 options above |
