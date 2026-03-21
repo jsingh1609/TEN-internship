@@ -4,7 +4,7 @@ import './IdeaCard.css';
 
 export default function IdeaCard({ idea, index }) {
   const { toggleSave, isSaved } = useIdeas();
-  const [copied, setCopied]     = useState(false);
+  const [copied, setCopied] = useState(false);
   const saved = isSaved(idea);
 
   function copyIdea() {
@@ -49,8 +49,8 @@ export default function IdeaCard({ idea, index }) {
       </div>
 
       <h3 className="ic-name">{idea.name}</h3>
-      <p  className="ic-tagline">"{idea.tagline}"</p>
-      <p  className="ic-desc">{idea.description}</p>
+      <p className="ic-tagline">"{idea.tagline}"</p>
+      <p className="ic-desc">{idea.description}</p>
 
       <div className="ic-meta">
         <div className="ic-meta-item">
@@ -62,6 +62,13 @@ export default function IdeaCard({ idea, index }) {
           <span className="ic-meta-val">{idea.audience}</span>
         </div>
       </div>
+
+      {idea.starterPrompt && (
+        <div className="ic-starter">
+          <div className="ic-starter-label">⚡ Starter Prompt</div>
+          <p className="ic-starter-text">{idea.starterPrompt}</p>
+        </div>
+      )}
     </div>
   );
 }

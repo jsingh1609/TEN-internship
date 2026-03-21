@@ -48,11 +48,12 @@ For each idea provide:
 3. A 2-3 sentence description
 4. The core technology or approach
 5. Target audience
+6. A starter prompt — a single actionable sentence telling the developer exactly how to start building this idea (e.g. "Build a REST API with Node.js that...")
 
 IMPORTANT: Respond ONLY with a valid JSON array. No markdown, no code fences, no extra text before or after.
 
 Example format:
-[{"id":1,"name":"Idea Name","tagline":"One sentence tagline","description":"2-3 sentence description.","technology":"Core tech","audience":"Target audience"}]`;
+[{"id":1,"name":"Idea Name","tagline":"One sentence tagline","description":"2-3 sentence description.","technology":"Core tech","audience":"Target audience","starterPrompt":"Build a React app that..."}]`;
 
   try {
     const completion = await groq.chat.completions.create({
