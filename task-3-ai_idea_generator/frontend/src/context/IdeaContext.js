@@ -4,9 +4,9 @@ const IdeaContext = createContext();
 
 export function IdeaProvider({ children }) {
   // Current generated ideas
-  const [ideas,     setIdeas]     = useState([]);
-  const [loading,   setLoading]   = useState(false);
-  const [error,     setError]     = useState(null);
+  const [ideas, setIdeas] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [lastQuery, setLastQuery] = useState(null);
 
   // Saved / favourite ideas
@@ -22,7 +22,7 @@ export function IdeaProvider({ children }) {
   });
 
   // Persist to localStorage
-  useEffect(() => { localStorage.setItem('is_saved',   JSON.stringify(saved));   }, [saved]);
+  useEffect(() => { localStorage.setItem('is_saved', JSON.stringify(saved)); }, [saved]);
   useEffect(() => { localStorage.setItem('is_history', JSON.stringify(history)); }, [history]);
 
   // Generate ideas via backend
@@ -32,8 +32,8 @@ export function IdeaProvider({ children }) {
     setIdeas([]);
 
     try {
-      const res = await fetch('/api/generate', {
-        method:  'POST',
+      const res = await fetch('https://ideaspark-backend-ejb9.onrender.com/api/generate', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ keyword, category, count }),
       });
@@ -46,11 +46,11 @@ export function IdeaProvider({ children }) {
 
       // Add to history
       const entry = {
-        id:        Date.now(),
+        id: Date.now(),
         keyword,
-        category:  category || 'Any',
-        count:     data.ideas.length,
-        ideas:     data.ideas,
+        category: category || 'Any',
+        count: data.ideas.length,
+        ideas: data.ideas,
         createdAt: new Date().toISOString(),
       };
       setHistory(prev => [entry, ...prev].slice(0, 50));
