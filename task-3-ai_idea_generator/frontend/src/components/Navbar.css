@@ -1,0 +1,170 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  background: rgba(5, 8, 16, 0.75);
+  backdrop-filter: blur(24px) saturate(1.5);
+  border-bottom: 1px solid var(--border);
+  transition: all 0.3s var(--ease);
+  animation: slideDown 0.6s var(--ease) both;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.navbar.scrolled {
+  background: rgba(5, 8, 16, 0.92);
+  border-color: var(--border2);
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(125, 255, 107, 0.05);
+}
+
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 0 36px;
+  height: 68px;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--t1);
+  letter-spacing: -0.02em;
+  position: relative;
+}
+
+.logo-spark {
+  display: inline-block;
+  color: var(--lime);
+  font-size: 1.1rem;
+  animation: spinSlow 10s linear infinite;
+  filter: drop-shadow(0 0 6px var(--lime));
+}
+
+@keyframes spinSlow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hover glow on brand */
+.nav-logo::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--lime), var(--cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.nav-logo:hover::after {
+  opacity: 1;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2px;
+  list-style: none;
+  margin-left: auto;
+}
+
+.nav-link {
+  display: block;
+  padding: 8px 16px;
+  font-size: 0.87rem;
+  font-weight: 500;
+  color: var(--t2);
+  border-radius: 10px;
+  transition: all 0.2s var(--ease);
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 1.5px;
+  background: linear-gradient(90deg, var(--lime), var(--cyan));
+  border-radius: 100px;
+  transition: width 0.25s var(--ease);
+}
+
+.nav-link:hover {
+  color: var(--t1);
+}
+
+.nav-link:hover::after {
+  width: 60%;
+}
+
+.nav-link.active {
+  color: var(--lime);
+  background: var(--lime-bg);
+  font-weight: 600;
+}
+
+.nav-link.active::after {
+  width: 60%;
+}
+
+.nav-cta {
+  background: linear-gradient(135deg, var(--lime), var(--lime-dk));
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 22px;
+  font-size: 0.87rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  box-shadow: 0 0 24px var(--lime-glow);
+  transition: all 0.25s var(--ease);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-cta::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(transparent 0deg, rgba(255, 255, 255, 0.1) 60deg, transparent 120deg);
+  animation: rotateConic 3s linear infinite;
+}
+
+@keyframes rotateConic {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.nav-cta:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 0 40px var(--lime-glow);
+}
