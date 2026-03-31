@@ -2,9 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { generateSchedule, COLORS } from "./utils/scheduler";
 import AddSubjects from "./components/AddSubjects";
 import Dashboard from "./components/Dashboard";
+import Preloader from "./components/Preloader";
+import CustomCursor from "./components/CustomCursor";
+import Testimonials from "./components/Testimonials";
+import HowItWorks from "./components/HowItWorks";
 import "./App.css";
 
 export default function App() {
+  const [ready, setReady] = useState(false);
   const [page, setPage] = useState("home");
   const [subjects, setSubjects] = useState(() => {
     try { return JSON.parse(localStorage.getItem("ssp_subjects") || "[]"); } catch { return []; }
@@ -20,9 +25,7 @@ export default function App() {
     localStorage.setItem("ssp_subjects", JSON.stringify(subjects));
   }, [subjects]);
 
-  useEffect(() => {
-    localStorage.setItem("ssp_progress", JSON.stringify(progress));
-  }, [progress]);
+  useEffect(() => { localStorage.setItem("ssp_progress", JSON.stringify(progress)); }, [progress]);
 
   const addSubject = (sub) => {
     const color = COLORS[subjects.length % COLORS.length];
@@ -37,12 +40,13 @@ export default function App() {
   const totalSessions = schedule.reduce((s, d) => s + d.sessions.length, 0);
   const doneSessions = Object.values(progress).filter(Boolean).length;
 
+  if (!ready) return <Preloader onDone={() => setReady(true)} />;
+
   return (
     <div className="app">
+      <CustomCursor />
       <div className="scene-grid" />
-      <div className="orb orb-1" />
-      <div className="orb orb-2" />
-      <div className="orb orb-3" />
+      <div className="orb orb-1" /><div className="orb orb-2" /><div className="orb orb-3" />
 
       <nav className="nav">
         <div className="nav-logo" onClick={() => setPage("home")}>
@@ -62,7 +66,7 @@ export default function App() {
       </nav>
 
       <main className="main">
-        {page === "home" && <Landing setPage={setPage} subjects={subjects} schedule={schedule} progress={progress} totalSessions={totalSessions} doneSessions={doneSessions} />}
+        {page === "home" && <Landing setPage={setPage} subjects={subjects} schedule={schedule} progress={progress} total={totalSessions} done={doneSessions} />}
         {page === "subjects" && <AddSubjects subjects={subjects} addSubject={addSubject} removeSubject={removeSubject} />}
         {page === "schedule" && <Dashboard schedule={schedule} progress={progress} toggleSession={toggleSession} subjects={subjects} />}
       </main>
@@ -70,32 +74,35 @@ export default function App() {
   );
 }
 
-function useCountUp(target, duration = 900) {
-  const [value, setValue] = useState(0);
-  const [triggered, setTriggered] = useState(false);
+/* ── animated counter ── */
+function useCountUp(target, duration = 900, delay = 0) {
+  const [val, setVal] = useState(0);
+  const [fired, setFired] = useState(false);
   const ref = useRef(null);
   useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting && !triggered) setTriggered(true); }, { threshold: 0.3 });
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting && !fired) setFired(true); }, { threshold: 0.3 });
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
-  }, [triggered]);
+  }, [fired]);
   useEffect(() => {
-    if (!triggered) return;
-    let start = null;
-    const step = (ts) => {
-      if (!start) start = ts;
-      const pct = Math.min((ts - start) / duration, 1);
-      const ease = 1 - Math.pow(1 - pct, 3);
-      setValue(Math.round(ease * target));
-      if (pct < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [triggered, target, duration]);
-  return [value, ref];
+    if (!fired) return;
+    const t = setTimeout(() => {
+      let start = null;
+      const step = (ts) => {
+        if (!start) start = ts;
+        const p = Math.min((ts - start) / duration, 1);
+        setVal(Math.round((1 - Math.pow(1 - p, 3)) * target));
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }, delay);
+    return () => clearTimeout(t);
+  }, [fired, target, duration, delay]);
+  return [val, ref];
 }
 
-function StatCard({ icon, value, label, suffix = "" }) {
-  const [count, ref] = useCountUp(typeof value === "number" ? value : 0);
+function StatCard({ icon, value, label, suffix = "", delay = 0 }) {
+  const [count, ref] = useCountUp(typeof value === "number" ? value : 0, 900, delay);
   const display = typeof value === "number" ? `${count}${suffix}` : value;
   return (
     <div className="stat-card" ref={ref}>
@@ -106,36 +113,64 @@ function StatCard({ icon, value, label, suffix = "" }) {
   );
 }
 
-function Landing({ setPage, subjects, schedule, progress, totalSessions, doneSessions }) {
-  const pct = totalSessions ? Math.round((doneSessions / totalSessions) * 100) : 0;
+/* ── LANDING ── */
+function Landing({ setPage, subjects, schedule, progress, total, done }) {
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  const listRef = useRef(null);
+
+  useEffect(() => {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) { setTimeout(() => e.target.classList.add("visible"), i * 80); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.08 });
+    listRef.current?.querySelectorAll(".anim-item").forEach(el => obs.observe(el));
+    return () => obs.disconnect();
+  }, [subjects]);
+
   return (
     <div className="landing">
+
+      {/* ── KEN BURNS HERO ── */}
       <div className="hero">
-        <div className="hero-eyebrow">AI-Powered Study Planner</div>
-        <h1 className="hero-title">Study <em>Smarter</em><br />Not Harder</h1>
-        <p className="hero-sub">
-          Add your subjects, exam dates and difficulty level. Get a beautiful, optimized 14-day study plan — instantly.
-        </p>
-        <div className="hero-actions">
-          <button className="btn-primary" onClick={() => setPage("subjects")}>Get Started →</button>
-          {subjects.length > 0 && <button className="btn-ghost" onClick={() => setPage("schedule")}>View Schedule</button>}
+        <div className="kb-bg">
+          <div className="kb-img kb-img-1" />
+          <div className="kb-img kb-img-2" />
+          <div className="kb-overlay" />
+        </div>
+        <div className="hero-content">
+          <div className="hero-eyebrow">AI-Powered Study Planner</div>
+          <h1 className="hero-title">Study <em>Smarter</em><br />Not Harder</h1>
+          <p className="hero-sub">Add subjects, exam dates and difficulty. Get a beautiful, optimized 14-day study plan — instantly.</p>
+          <div className="hero-actions">
+            <button className="btn-primary" onClick={() => setPage("subjects")}>Get Started →</button>
+            {subjects.length > 0 && <button className="btn-ghost" onClick={() => setPage("schedule")}>View Schedule</button>}
+          </div>
         </div>
       </div>
 
+      {/* STATS */}
       <div className="stats-row">
-        <StatCard icon="📖" value={subjects.length} label="Subjects Added" />
-        <StatCard icon="📅" value={schedule.length} label="Study Days" />
-        <StatCard icon="🎯" value={pct} label="Progress" suffix="%" />
+        <StatCard icon="📖" value={subjects.length} label="Subjects Added" delay={0} />
+        <StatCard icon="📅" value={schedule.length} label="Study Days" delay={80} />
+        <StatCard icon="🎯" value={pct} label="Progress" suffix="%" delay={160} />
       </div>
 
+      {/* HOW IT WORKS — tabs + timeline */}
+      <HowItWorks />
+
+      {/* TESTIMONIALS */}
+      <Testimonials />
+
+      {/* UPCOMING EXAMS */}
       {subjects.length > 0 && (
-        <div className="upcoming">
+        <div className="upcoming" ref={listRef}>
           <div className="section-label">Upcoming Exams</div>
           <div className="exam-list">
             {[...subjects].sort((a, b) => new Date(a.examDate) - new Date(b.examDate)).slice(0, 5).map((s, i) => {
               const days = Math.ceil((new Date(s.examDate) - new Date()) / 86400000);
               return (
-                <div key={s.id} className="exam-card" style={{ borderLeftColor: s.color, animationDelay: `${i * 0.07}s` }}>
+                <div key={s.id} className="exam-card anim-item" style={{ borderLeftColor: s.color, transitionDelay: `${i * 60}ms` }}>
                   <span className="exam-dot" style={{ background: s.color, color: s.color }} />
                   <div className="exam-info">
                     <span className="exam-name">{s.name}</span>
