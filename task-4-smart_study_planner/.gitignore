@@ -1,2 +1,16 @@
+# Dependencies
 node_modules
+.vite
 dist
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Misc
+.DS_Store
+Thumbs.db
