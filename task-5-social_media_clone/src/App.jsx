@@ -1,4 +1,5 @@
-import InstagramFeed from './InstagramFeed';
+import InstagramApp from './InstagramApp';
+// import InstagramFeed from './InstagramFeed';
 // import SimpleFeed from './SimpleFeed';
 // import SocialFeedDemo from './social-media-feed-item';
 import './App.css';
@@ -6,8 +7,9 @@ import './App.css';
 function App() {
   return (
     <div className="App">
-      <InstagramFeed />
+      <InstagramApp />
       {/* Alternative options: */}
+      {/* <InstagramFeed /> */}
       {/* <SimpleFeed /> */}
       {/* <SocialFeedDemo /> */}
     </div>
