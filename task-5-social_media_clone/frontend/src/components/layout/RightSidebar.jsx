@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { mockSuggestions } from '../../data/mockData';
 
-export default function RightSidebar({ userProfile }) {
+export default function RightSidebar({ userProfile, suggestedUsers = [] }) {
   const { logout } = useAuth();
+  const [followed, setFollowed] = useState({});
+
+  const handleFollow = (id) => {
+    setFollowed(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   return (
     <div className="w-full">
@@ -25,11 +29,11 @@ export default function RightSidebar({ userProfile }) {
 
       <div className="flex items-center justify-between mb-4">
         <div className="text-sm font-semibold text-neutral-400">Suggested for you</div>
-        <button className="text-white text-xs font-semibold hover:text-neutral-300">See All</button>
+        <button onClick={() => alert('View all suggestions')} className="text-white text-xs font-semibold hover:text-neutral-300">See All</button>
       </div>
 
       <div className="space-y-4">
-        {mockSuggestions.map((user) => (
+        {suggestedUsers.map((user) => (
           <div key={user.id} className="flex items-center justify-between">
             <div className="flex items-center gap-3 cursor-pointer group">
               <img src={user.avatar} alt={user.username} className="w-8 h-8 rounded-full object-cover group-hover:scale-105 transition-transform" />
@@ -38,16 +42,17 @@ export default function RightSidebar({ userProfile }) {
                 <div className="text-xs text-neutral-400 truncate w-[140px]">{user.relation}</div>
               </div>
             </div>
-            <button className="text-blue-500 text-xs font-semibold hover:text-white transition-colors">Follow</button>
+            <button 
+              onClick={() => handleFollow(user.id)}
+              className={`text-xs font-semibold transition-colors ${followed[user.id] ? 'text-neutral-400' : 'text-blue-500 hover:text-white'}`}
+            >
+              {followed[user.id] ? 'Following' : 'Follow'}
+            </button>
           </div>
         ))}
       </div>
 
-      <div className="mt-8 text-xs text-neutral-600 flex flex-wrap gap-x-2 gap-y-1">
-        {['About', 'Help', 'Press', 'API', 'Jobs', 'Privacy', 'Terms', 'Locations', 'Language', 'Meta Verified'].map(link => (
-          <a key={link} href="#" className="hover:underline">{link}</a>
-        ))}
-      </div>
+
       <div className="mt-4 text-xs text-neutral-600">
         © 2026 VIBEGRAM FROM VIBECODE
       </div>

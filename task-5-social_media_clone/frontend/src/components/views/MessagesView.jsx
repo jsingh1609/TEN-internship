@@ -1,12 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PlusSquare, ArrowLeft, Phone, Video, Info, Smile, Image as ImageIcon, Heart, Send } from 'lucide-react';
-import { mockSuggestions } from '../../data/mockData';
 
-export default function MessagesView({ userProfile }) {
+export default function MessagesView({ userProfile, messagesMap, setMessagesMap, suggestedUsers = [] }) {
   const [activeChat, setActiveChat] = useState(null);
   const [chatText, setChatText] = useState('');
-  const [messagesMap, setMessagesMap] = useState({});
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [callState, setCallState] = useState(null); // 'calling', 'connected', 'no_answer'
+  const [callType, setCallType] = useState(null); // 'audio', 'video'
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const callTimeoutRef = useRef(null);
+
+  const emojis = [
+    '😀', '😂', '🤣', '😊', '😍', '🥰', '😘', '🥺', '😭', '😤', 
+    '😡', '🤯', '😱', '🤔', '😎', '😴', '🥱', '🤢', '🥳', '🤡',
+    '❤️', '✨', '🔥', '👍', '👎', '👏', '🙌', '🙏', '🤝', '💪',
+    '💯', '🎉', '🎊', '🎁', '🎈', '🎂', '🐶', '🐱', '🚀', '⭐',
+    '💀', '👽', '🍔', '🍕', '🍻', '☕', '⚽', '🏀', '🎮', '🎵'
+  ];
 
   const getMessages = (userId) => {
     return messagesMap[userId] || [
@@ -24,6 +35,51 @@ export default function MessagesView({ userProfile }) {
       }));
       setChatText('');
     }
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && activeChat) {
+      const imageUrl = URL.createObjectURL(file);
+      const newMsg = { id: Date.now(), text: '', imageUrl: imageUrl, isMine: true };
+      setMessagesMap(prev => ({
+        ...prev,
+        [activeChat.id]: [...getMessages(activeChat.id), newMsg]
+      }));
+    }
+    if (e.target) e.target.value = null; // reset input
+  };
+
+  const startCall = (type) => {
+    setCallType(type);
+    setCallState('calling');
+    
+    // Premade bots have low IDs (e.g., <= 10) or specific usernames
+    const isBot = activeChat.id <= 10 || ['intern_vibecode', 'tech_guru', 'react.devs', 'django_masters'].includes(activeChat.username);
+
+    if (isBot) {
+      // Connect quickly, then disconnect
+      callTimeoutRef.current = setTimeout(() => {
+        setCallState('connected');
+        callTimeoutRef.current = setTimeout(() => {
+          endCall();
+        }, 1500);
+      }, 2000);
+    } else {
+      // Real user wait, then no answer
+      callTimeoutRef.current = setTimeout(() => {
+        setCallState('no_answer');
+        callTimeoutRef.current = setTimeout(() => {
+          endCall();
+        }, 3000);
+      }, 60000); // Wait 1 minute
+    }
+  };
+
+  const endCall = () => {
+    clearTimeout(callTimeoutRef.current);
+    setCallState(null);
+    setCallType(null);
   };
 
   useEffect(() => {
@@ -46,7 +102,7 @@ export default function MessagesView({ userProfile }) {
           <span className="font-semibold text-base">Messages</span>
         </div>
         <div className="flex-1 overflow-y-auto scrollbar-hide pb-4">
-          {mockSuggestions.map(u => (
+          {suggestedUsers.map(u => (
             <div
               key={u.id}
               onClick={() => setActiveChat(u)}
@@ -72,9 +128,14 @@ export default function MessagesView({ userProfile }) {
             <img src={activeChat.avatar} className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover" alt="avatar" />
             <div className="flex-1 font-semibold">{activeChat.username}</div>
             <div className="flex gap-4">
-              <Phone className="w-6 h-6 text-white cursor-pointer hover:text-neutral-400 transition-colors" />
-              <Video className="w-6 h-6 text-white cursor-pointer hover:text-neutral-400 transition-colors" />
-              <Info className="w-6 h-6 text-white cursor-pointer hover:text-neutral-400 hidden sm:block transition-colors" />
+              <Phone 
+                onClick={() => startCall('audio')}
+                className="w-6 h-6 text-white cursor-pointer hover:text-neutral-400 transition-colors" 
+              />
+              <Video 
+                onClick={() => startCall('video')}
+                className="w-6 h-6 text-white cursor-pointer hover:text-neutral-400 transition-colors" 
+              />
             </div>
           </div>
 
@@ -95,16 +156,46 @@ export default function MessagesView({ userProfile }) {
                     ? 'btn-gradient text-white rounded-2xl rounded-br-sm'
                     : 'bg-neutral-800 text-white rounded-2xl rounded-bl-sm border border-neutral-700'
                 }`}>
-                  {m.text}
+                  {m.text && <div>{m.text}</div>}
+                  {m.imageUrl && (
+                    <img src={m.imageUrl} alt="uploaded" className="rounded-xl w-full h-auto object-cover max-h-48 shadow-lg border border-white/10" />
+                  )}
+                  {m.postAttachment && (
+                    <div className="mt-2 rounded-xl overflow-hidden shadow-lg border border-white/10 bg-black/20">
+                      <img src={m.postAttachment.image} alt="post" className="w-full h-auto object-cover max-h-48" />
+                      <div className="p-2 text-xs backdrop-blur-md bg-black/40">
+                        <span className="font-semibold">{m.postAttachment.user.username}</span>{' '}
+                        <span className="text-white/80 line-clamp-1">{m.postAttachment.caption}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="p-4 pt-2 glass border-t border-neutral-800">
+          <div className="p-4 pt-2 glass border-t border-neutral-800 relative">
+            {showEmojiPicker && (
+              <div className="absolute bottom-full left-4 mb-2 bg-neutral-900 border border-neutral-800 rounded-xl p-3 shadow-2xl grid grid-cols-5 md:grid-cols-8 gap-1 overflow-y-auto max-h-48 animate-fade-in z-50 animate-slide-up-fade">
+                {emojis.map(emoji => (
+                  <button 
+                    key={emoji} 
+                    onClick={() => setChatText(prev => prev + emoji)}
+                    className="w-8 h-8 flex items-center justify-center hover:bg-neutral-800 rounded-lg text-lg transition-colors active:scale-95"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="border border-neutral-600 rounded-full flex items-center px-4 py-2.5 bg-black/50 focus-within:border-neutral-400 transition-colors">
-              <Smile className="w-6 h-6 text-neutral-400 mr-3 cursor-pointer hover:text-white transition-colors flex-shrink-0" />
+              <div className="relative">
+                <Smile 
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className={`w-6 h-6 mr-3 cursor-pointer transition-colors flex-shrink-0 ${showEmojiPicker ? 'text-white' : 'text-neutral-400 hover:text-white'}`} 
+                />
+              </div>
               <input
                 type="text"
                 className="flex-1 bg-transparent outline-none text-sm text-white placeholder-neutral-500"
@@ -119,12 +210,55 @@ export default function MessagesView({ userProfile }) {
                 </button>
               ) : (
                 <div className="flex gap-3 ml-3 text-white">
-                  <ImageIcon className="w-6 h-6 cursor-pointer hover:text-neutral-300 transition-colors" />
-                  <Heart className="w-6 h-6 cursor-pointer hover:text-red-500 transition-colors" />
+                  <input type="file" accept="image/*" hidden ref={fileInputRef} onChange={handleImageUpload} />
+                  <ImageIcon 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-6 h-6 cursor-pointer hover:text-neutral-300 transition-colors" 
+                  />
                 </div>
               )}
             </div>
           </div>
+
+          {/* Call Overlay */}
+          {callState && (
+            <div className="absolute inset-0 bg-neutral-900 border-l border-neutral-800 z-[100] flex flex-col items-center justify-center animate-fade-in">
+              {callType === 'video' && callState === 'connected' ? (
+                <div className="absolute inset-0 bg-neutral-800">
+                  <video autoPlay loop muted playsInline className="w-full h-full object-cover">
+                    <source src="https://assets.mixkit.co/videos/preview/mixkit-young-woman-working-on-her-laptop-312-large.mp4" type="video/mp4" />
+                  </video>
+                  <div className="absolute inset-0 bg-black/40" />
+                </div>
+              ) : null}
+
+              <div className="relative z-10 flex flex-col items-center w-full h-full pt-20">
+                <div className="relative mb-6">
+                  <img src={activeChat.avatar} className="w-32 h-32 rounded-full object-cover border-4 border-neutral-800 shadow-2xl" alt="avatar" />
+                  {callState === 'calling' && (
+                    <div className="absolute inset-0 rounded-full border-4 border-green-500 animate-ping opacity-75" />
+                  )}
+                </div>
+                <h2 className="text-3xl font-bold text-white mb-2">{activeChat.username}</h2>
+                <p className="text-neutral-400 text-lg mb-auto">
+                  {callState === 'calling' && `${callType === 'video' ? 'Video' : 'Voice'} Calling...`}
+                  {callState === 'connected' && `0:01`}
+                  {callState === 'no_answer' && `Call not picked`}
+                </p>
+
+                <div className="flex items-center gap-6 pb-20">
+                  {callState === 'calling' && (
+                    <button className="w-14 h-14 rounded-full bg-neutral-800/80 backdrop-blur-md hover:bg-neutral-700 flex items-center justify-center transition-colors">
+                      {callType === 'video' ? <Video className="w-6 h-6 text-white" /> : <Phone className="w-6 h-6 text-white" />}
+                    </button>
+                  )}
+                  <button onClick={endCall} className="w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-colors shadow-[0_0_20px_rgba(239,68,68,0.5)]">
+                    <Phone className="w-8 h-8 text-white rotate-[135deg]" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="hidden md:flex flex-1 flex-col items-center justify-center text-neutral-400 h-full bg-black/40">

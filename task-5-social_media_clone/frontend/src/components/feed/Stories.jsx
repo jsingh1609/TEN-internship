@@ -1,14 +1,40 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { PlusSquare } from 'lucide-react';
+import api from '../../api';
 
-export default function Stories({ stories, onStoryClick }) {
+export default function Stories({ stories, onStoryClick, onStoryCreated }) {
+  const fileInputRef = useRef(null);
+
+  const handleStoryClick = (index, isUser) => {
+    if (isUser) {
+      fileInputRef.current?.click();
+    } else {
+      onStoryClick(index);
+    }
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('image_file', file);
+      try {
+        const newStory = await api.createStory(formData);
+        if (onStoryCreated) onStoryCreated(newStory);
+      } catch (err) {
+        console.error('Error creating story:', err);
+      }
+    }
+  };
+
   return (
     <div className="py-4 mb-4">
+      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
       <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 px-2 items-center">
         {stories.map((story, index) => (
           <div
             key={story.id}
-            onClick={() => onStoryClick(index)}
+            onClick={() => handleStoryClick(index, story.is_user)}
             className="flex flex-col items-center gap-1 cursor-pointer min-w-[72px] hover:scale-105 active:scale-95 transition-all duration-200 group"
           >
             <div

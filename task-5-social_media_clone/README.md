@@ -248,12 +248,21 @@ See `api/models.py` for complete schema.
 
 ## 🎨 UI/UX Features
 
-### Animations
+### Advanced Interactions
+- Seamless image zooming on feed posts
+- Share Modal allowing direct post forwarding into DMs
+- Expandable Emoji Picker with a curated grid of 50+ emojis
+- Mock Audio and Video Calling system with real-time UI simulations
+- Interactive 'More' navigation menu with issue reporting flow
+- Functional local image attachment logic in messages
+
+### Animations & Aesthetics
+- Immersive Three.js Animated Background featuring tracking particles and rotating glass torus halos
+- Glassmorphic floating UI elements and semi-transparent sidebars
 - Slide-up fade on scroll
-- Staggered grid loading
-- Smooth transitions
-- Hover scale effects
-- Double-tap heart animation
+- Staggered grid loading for seamless profile rendering
+- Smooth hover scale transitions
+- Huge double-tap heart popping animation
 - Story ring gradients
 
 ### Responsive Design
@@ -377,8 +386,9 @@ lsof -ti:8000 | xargs kill -9
 - [ ] Video upload for Reels
 - [ ] Push notifications
 - [ ] Image filters and editing
-- [ ] Hashtag system
-- [ ] Saved posts collection
+- [ ] Hashtag ranking system
+- [x] Saved posts collection  *(Completed)*
+- [x] In-app post sharing to DMs *(Completed)*
 - [ ] Multiple image carousel
 - [ ] Story replies
 - [ ] Direct message reactions

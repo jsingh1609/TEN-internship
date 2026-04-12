@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Film, Heart, MessageCircle, Send, MoreHorizontal } from 'lucide-react';
 
 export default function ReelsView() {
+  const [isLiked, setIsLiked] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+
   return (
     <div className="w-full max-w-[400px] h-[calc(100vh-140px)] mx-auto mt-4 md:mt-8 rounded-xl bg-neutral-900 relative flex items-center justify-center overflow-hidden animate-slide-up-fade shadow-2xl">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/90 z-10" />
@@ -16,27 +19,42 @@ export default function ReelsView() {
         <div className="flex items-center gap-2 cursor-pointer">
           <img src="https://picsum.photos/seed/reel/50/50" className="w-8 h-8 rounded-full border border-neutral-700" alt="creator" />
           <span className="font-semibold text-sm hover:underline">vibecode_life</span>
-          <button className="text-xs font-semibold px-2 py-1 border border-white rounded-lg ml-2 hover:bg-white hover:text-black transition-colors">Follow</button>
+          <button 
+            onClick={() => setIsFollowing(!isFollowing)}
+            className={`text-xs font-semibold px-2 py-1 rounded-lg ml-2 transition-colors ${
+              isFollowing 
+                ? 'bg-neutral-800 text-white hover:bg-neutral-700' 
+                : 'border border-white hover:bg-white hover:text-black'
+            }`}
+          >
+            {isFollowing ? 'Following' : 'Follow'}
+          </button>
         </div>
         <p className="text-sm">Enjoying the developer vibes! 🎵 #coding #reels #vibecode</p>
-        <div className="flex items-center gap-2 bg-white/20 w-fit px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm cursor-pointer">
+        <div 
+          onClick={() => alert("Playing audio: chill_beats")}
+          className="flex items-center gap-2 bg-white/20 w-fit px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm cursor-pointer hover:bg-white/30 transition-colors"
+        >
           <Film className="w-3 h-3" /> Original Audio - chill_beats
         </div>
       </div>
 
       <div className="absolute bottom-6 right-4 z-20 flex flex-col items-center gap-6 animate-fade-in">
-        <div className="flex flex-col items-center gap-1 cursor-pointer group">
-          <Heart className="w-7 h-7 group-hover:scale-110 transition-transform text-white group-active:text-red-500" />
-          <span className="text-xs font-medium drop-shadow-md">12.4K</span>
+        <div onClick={() => setIsLiked(!isLiked)} className="flex flex-col items-center gap-1 cursor-pointer group">
+          <Heart className={`w-7 h-7 group-hover:scale-110 transition-transform ${isLiked ? 'fill-red-500 text-red-500' : 'text-white group-active:text-red-500'}`} />
+          <span className="text-xs font-medium drop-shadow-md">{isLiked ? '12.5K' : '12.4K'}</span>
         </div>
-        <div className="flex flex-col items-center gap-1 cursor-pointer group">
+        <div onClick={() => alert('Comments view coming soon!')} className="flex flex-col items-center gap-1 cursor-pointer group">
           <MessageCircle className="w-7 h-7 group-hover:scale-110 transition-transform" />
           <span className="text-xs font-medium drop-shadow-md">342</span>
         </div>
-        <div className="flex flex-col items-center gap-1 cursor-pointer group">
+        <div onClick={() => {
+          navigator.clipboard.writeText(`${window.location.origin}/reels`);
+          alert('Reel link copied to clipboard!');
+        }} className="flex flex-col items-center gap-1 cursor-pointer group">
           <Send className="w-7 h-7 group-hover:scale-110 transition-transform -rotate-12" />
         </div>
-        <div className="flex flex-col items-center gap-1 cursor-pointer group">
+        <div onClick={() => alert('More options')} className="flex flex-col items-center gap-1 cursor-pointer group">
           <MoreHorizontal className="w-7 h-7 group-hover:scale-110 transition-transform" />
         </div>
         <div className="w-8 h-8 rounded-lg overflow-hidden border-2 border-white mt-2 cursor-pointer animate-spin-slow">

@@ -1,21 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Smile,
-  Edit3, Trash2, X
+  Edit3, Trash2, X, Link
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api';
 
-export default function Post({ post, isLiked, onLikeToggle, onPostDelete, onPostEdit, onOpenComments }) {
+export default function Post({ post, isLiked, onLikeToggle, onPostDelete, onPostEdit, onOpenComments, onShare, suggestedUsers = [], isSavedGlobal, onSaveToggle }) {
   const { user } = useAuth();
   const [showHeart, setShowHeart] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(isSavedGlobal || false);
   const [isVisible, setIsVisible] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [localLiked, setLocalLiked] = useState(isLiked);
   const [likesCount, setLikesCount] = useState(post.likes_count);
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
   const postRef = useRef(null);
   const menuRef = useRef(null);
 
@@ -64,6 +66,10 @@ export default function Post({ post, isLiked, onLikeToggle, onPostDelete, onPost
     }
   };
 
+  const handleShare = () => {
+    setShowShareModal(true);
+  };
+
   const handleCommentSubmit = async () => {
     if (commentText.trim()) {
       try {
@@ -98,7 +104,7 @@ export default function Post({ post, isLiked, onLikeToggle, onPostDelete, onPost
         <div className="flex justify-between items-center p-3">
           <div className="flex items-center gap-3 cursor-pointer">
             <div className="bg-gradient-to-tr from-yellow-400 to-fuchsia-600 p-[2px] rounded-full">
-              <img src={post.user.avatar} className="w-8 h-8 rounded-full border-2 border-black object-cover" alt="avatar" />
+              <img src={post.user.avatar?.startsWith('/') ? `http://localhost:8000${post.user.avatar}` : post.user.avatar} className="w-8 h-8 rounded-full border-2 border-black object-cover" alt="avatar" />
             </div>
             <div>
               <div className="text-sm font-semibold hover:text-neutral-300">{post.user.username}</div>
@@ -129,7 +135,7 @@ export default function Post({ post, isLiked, onLikeToggle, onPostDelete, onPost
                     <div className="h-px bg-white/10 mx-3 my-1" />
                   </>
                 )}
-                <button className="flex items-center gap-3 w-full px-4 py-2.5 text-sm hover:bg-white/10 transition-colors">
+                <button onClick={() => { setShowMenu(false); handleShare(); }} className="flex items-center gap-3 w-full px-4 py-2.5 text-sm hover:bg-white/10 transition-colors">
                   <Send className="w-4 h-4" /> Share
                 </button>
               </div>
@@ -139,9 +145,14 @@ export default function Post({ post, isLiked, onLikeToggle, onPostDelete, onPost
 
         {/* Image */}
         <div className="relative w-full aspect-square bg-neutral-900 flex items-center justify-center cursor-pointer" onDoubleClick={handleDoubleTap}>
-          <img src={post.image} alt="Post content" className="w-full h-full object-cover" />
+          <img 
+            src={post.image?.startsWith('/') ? `http://localhost:8000${post.image}` : post.image} 
+            alt="Post content" 
+            className="w-full h-full object-cover" 
+            onClick={() => setIsZoomed(true)}
+          />
           {showHeart && (
-            <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
               <Heart className="w-24 h-24 text-white fill-white drop-shadow-2xl animate-heart-pop" />
             </div>
           )}
@@ -160,11 +171,11 @@ export default function Post({ post, isLiked, onLikeToggle, onPostDelete, onPost
               >
                 <MessageCircle className="w-6 h-6" />
               </button>
-              <button className="hover:opacity-60 transition-all active:scale-75">
+              <button onClick={handleShare} className="hover:opacity-60 transition-all active:scale-75">
                 <Send className="w-6 h-6" />
               </button>
             </div>
-            <button onClick={() => setIsSaved(!isSaved)} className="hover:opacity-60 transition-all active:scale-75">
+            <button onClick={() => { setIsSaved(!isSaved); if (onSaveToggle) onSaveToggle(post); }} className="hover:opacity-60 transition-all active:scale-75">
               <Bookmark className={`w-6 h-6 transition-colors duration-300 ${isSaved ? 'fill-white text-white' : 'text-white'}`} />
             </button>
           </div>
@@ -234,6 +245,68 @@ export default function Post({ post, isLiked, onLikeToggle, onPostDelete, onPost
                   Cancel
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Zoom Modal */}
+      {isZoomed && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-4 animate-fade-in cursor-zoom-out" onClick={() => setIsZoomed(false)}>
+          <img 
+            src={post.image?.startsWith('/') ? `http://localhost:8000${post.image}` : post.image} 
+            alt="Zoomed post" 
+            className="max-w-full max-h-full object-contain cursor-zoom-out" 
+            onClick={() => setIsZoomed(false)} 
+          />
+          <X className="absolute top-4 right-4 w-8 h-8 text-neutral-400 hover:text-white cursor-pointer" onClick={() => setIsZoomed(false)} />
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/80 backdrop-blur-sm sm:items-center p-0 md:p-4 animate-fade-in" onClick={() => setShowShareModal(false)}>
+          <div className="bg-neutral-900 border border-neutral-800 rounded-t-3xl sm:rounded-2xl w-full max-w-sm overflow-hidden animate-slide-up-fade flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center p-4 border-b border-neutral-800 border-opacity-50 relative">
+              <h3 className="font-semibold text-center w-full">Share</h3>
+              <X className="w-6 h-6 cursor-pointer absolute right-4 text-neutral-400 hover:text-white" onClick={() => setShowShareModal(false)} />
+            </div>
+            
+            <div className="p-4 flex gap-4 overflow-x-auto scrollbar-hide border-b border-neutral-800 border-opacity-50">
+              <button 
+                className="flex flex-col items-center gap-2 min-w-[72px]"
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`);
+                  alert('Link copied to clipboard!');
+                  setShowShareModal(false);
+                }}
+              >
+                <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center hover:bg-neutral-700 transition">
+                  <Link className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-xs">Copy link</span>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {suggestedUsers.map(user => (
+                <div key={user.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <img src={user.avatar} className="w-10 h-10 rounded-full object-cover" alt="avatar" />
+                    <span className="text-sm font-semibold">{user.username}</span>
+                  </div>
+                  <button 
+                    onClick={(e) => {
+                      if (onShare) onShare(user, post);
+                      e.target.innerText = 'Sent';
+                      e.target.className = 'text-xs px-4 py-1.5 rounded-lg font-semibold bg-neutral-800 text-neutral-400 pointer-events-none';
+                      setTimeout(() => setShowShareModal(false), 800);
+                    }}
+                    className="text-xs px-4 py-1.5 rounded-lg font-semibold bg-blue-500 hover:bg-blue-600 text-white transition-colors"
+                  >
+                    Send
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>

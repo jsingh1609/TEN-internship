@@ -54,7 +54,11 @@ export default function SearchView({ searchQuery, setSearchQuery }) {
           </div>
         ) : results.length > 0 ? (
           results.map(user => (
-            <div key={user.id} className="flex items-center justify-between cursor-pointer hover:bg-white/5 p-2 rounded-xl transition-colors glass-dark -mx-2">
+            <div 
+              key={user.id} 
+              onClick={() => alert(`View profile for @${user.username} (Coming soon!)`)}
+              className="flex items-center justify-between cursor-pointer hover:bg-white/5 p-2 rounded-xl transition-colors glass-dark -mx-2"
+            >
               <div className="flex items-center gap-3">
                 <img src={user.avatar} alt={user.username} className="w-12 h-12 rounded-full object-cover" />
                 <div>

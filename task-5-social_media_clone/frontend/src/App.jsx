@@ -28,6 +28,7 @@ function MainApp() {
   const [posts, setPosts] = useState([]);
   const [stories, setStories] = useState([]);
   const [likedPosts, setLikedPosts] = useState(new Set());
+  const [savedPosts, setSavedPosts] = useState(new Set());
   
   // Modals state
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -38,6 +39,21 @@ function MainApp() {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingContent, setLoadingContent] = useState(true);
+  const [messagesMap, setMessagesMap] = useState({});
+  const [suggestedUsers, setSuggestedUsers] = useState([]);
+
+  const handleShareToChat = (userToShareWith, post) => {
+    setMessagesMap(prev => {
+      const existing = prev[userToShareWith.id] || [];
+      const newMsg = {
+        id: Date.now(),
+        text: `Check out this post from @${post.user.username}`,
+        postAttachment: post,
+        isMine: true
+      };
+      return { ...prev, [userToShareWith.id]: [...existing, newMsg] };
+    });
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -51,6 +67,10 @@ function MainApp() {
           ...(Array.isArray(storiesData) ? storiesData : []).map(s => ({ ...s, has_unseen: true }))
         ];
         setStories(formattedStories);
+
+        const usersData = await api.searchUsers('');
+        const fetchedUsers = Array.isArray(usersData) ? usersData : (usersData.results || []);
+        setSuggestedUsers(fetchedUsers.filter(u => u.id !== user.id).slice(0, 10));
       } catch (error) {
         console.error('Error loading initial data:', error);
       } finally {
@@ -60,12 +80,21 @@ function MainApp() {
     loadData();
   }, [user]);
 
-  const handleLikeToggle = (postId) => {
+  const handleLikeToggle = (postId, isNowLiked) => {
     setLikedPosts(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(postId)) newSet.delete(postId);
-      else newSet.add(postId);
-      return newSet;
+      const newMap = new Set(prev);
+      if (isNowLiked) newMap.add(postId);
+      else newMap.delete(postId);
+      return newMap;
+    });
+  };
+
+  const handleSavePost = (post) => {
+    setSavedPosts(prev => {
+      const newMap = new Set(prev);
+      if (newMap.has(post.id)) newMap.delete(post.id);
+      else newMap.add(post.id);
+      return newMap;
     });
   };
 
@@ -73,6 +102,10 @@ function MainApp() {
     setPosts([newPost, ...posts]);
     setCurrentView('home');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleStoryCreated = (newStory) => {
+    setStories(prev => [...prev, { ...newStory, has_unseen: true }]);
   };
 
   const handleUpdatePost = (updatedPost) => {
@@ -94,7 +127,7 @@ function MainApp() {
           <>
             <main className="w-full max-w-[470px] lg:max-w-[470px] px-0 md:px-4 pt-0 md:pt-8 flex flex-col items-center pb-20 md:pb-0 z-10 relative">
               <div className="w-full max-w-[630px] md:max-w-full overflow-hidden">
-                <Stories stories={stories} onStoryClick={setViewingStoryIndex} />
+                <Stories stories={stories} onStoryClick={setViewingStoryIndex} onStoryCreated={handleStoryCreated} />
                 <div className="w-full space-y-4">
                   {posts.map((post) => (
                     <Post 
@@ -105,22 +138,27 @@ function MainApp() {
                       onPostDelete={handleDeletePost}
                       onPostEdit={setEditingPost}
                       onOpenComments={setViewingCommentsFor}
+                      onShare={handleShareToChat}
+                      suggestedUsers={suggestedUsers}
+                      isSavedGlobal={savedPosts.has(post.id)}
+                      onSaveToggle={handleSavePost}
                     />
                   ))}
                 </div>
               </div>
             </main>
             <div className="hidden lg:block w-[320px] pl-8 pt-8 mr-4 xl:mr-16 animate-slide-up-fade z-10 relative" style={{ animationDelay: '150ms' }}>
-              <RightSidebar userProfile={user} />
+                <RightSidebar userProfile={user} suggestedUsers={suggestedUsers} />
             </div>
           </>
         );
       case 'search': return <SearchView searchQuery={searchQuery} setSearchQuery={setSearchQuery} />;
       case 'explore': return <ExploreView />;
       case 'reels': return <ReelsView />;
-      case 'messages': return <MessagesView userProfile={user} />;
+      case 'messages':
+        return <MessagesView userProfile={user} messagesMap={messagesMap} setMessagesMap={setMessagesMap} suggestedUsers={suggestedUsers} />;
       case 'notifications': return <NotificationsView />;
-      case 'profile': return <ProfileView userProfile={user} onOpenEdit={() => setIsEditProfileOpen(true)} />;
+      case 'profile': return <ProfileView userProfile={user} onOpenEdit={() => setIsEditProfileOpen(true)} savedPosts={posts.filter(p => savedPosts.has(p.id))} />;
       default: return <div className="text-white mt-10">View not found</div>;
     }
   };
