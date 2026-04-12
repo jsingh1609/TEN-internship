@@ -1,463 +1,411 @@
-# 🌊 Liquid Distortion Social Feed
+# 🎨 Vibegram - Instagram Clone
 
-A production-ready React + WebGL social media feed component featuring real-time liquid distortion shader effects, GSAP scroll animations, and a modular shader system.
+**Full-Stack Social Media Application for Vibecode Internship**
 
-![Demo](https://img.shields.io/badge/WebGL-Powered-blue) ![React](https://img.shields.io/badge/React-18.2-61DAFB) ![Three.js](https://img.shields.io/badge/Three.js-0.160-black)
+Built with Django REST Framework + React | Complete Instagram-like experience with posts, stories, comments, likes, messages, and more!
 
-## ✨ Features
+---
 
-- 🎨 **Real-time WebGL Liquid Distortion** - Interactive shader effects that respond to cursor movement
-- 🔄 **Modular Shader System** - 7 different shader effects ready to swap
-- 📜 **GSAP ScrollTrigger** - Smooth scroll-based reveal animations with staggered entrance
-- 🎯 **Premium Editorial Design** - Distinctive typography and dark theme aesthetics
-- ⚡ **Performance Optimized** - Smooth 60fps rendering on modern devices
-- 📱 **Fully Responsive** - Beautiful on desktop, tablet, and mobile
+## 📸 Features
+
+### ✨ Core Features
+- **User Profiles** - Customizable profiles with bio, avatar, follower/following counts
+- **Posts** - Create, view, like, and comment on photo posts
+- **Stories** - 24-hour expiring content (like Instagram Stories)
+- **Feed** - Personalized feed with posts from followed users
+- **Explore** - Discover new content and users
+- **Messages** - Direct messaging between users
+- **Reels** - Video content section (UI implemented)
+- **Search** - Find users across the platform
+- **Notifications** - Activity updates and interactions
+- **Comments** - Nested commenting system
+- **Likes** - Double-tap to like posts
+- **Responsive Design** - Perfect on mobile, tablet, and desktop
+
+### 🎯 Technical Highlights
+- **Backend**: Django 4.2 + Django REST Framework
+- **Frontend**: React with Hooks (useState, useEffect, useRef)
+- **Database**: SQLite (easily switchable to PostgreSQL)
+- **API**: RESTful API with proper serialization
+- **Authentication Ready**: User model extended from AbstractUser
+- **Real-time Updates**: Live feed refresh and interactions
+- **Optimized Performance**: Lazy loading, intersection observers
+- **Professional UI**: Instagram-inspired design with custom animations
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 16+ installed
-- Modern browser with WebGL 2.0 support
+- Python 3.8+
+- Node.js 14+ & npm
+- Git
 
-### Installation & Running
+### Backend Setup
 
 ```bash
-# Install dependencies (if not already done)
-npm install
+# 1. Clone the repository
+git clone <your-repo-url>
+cd vibegram-instagram-clone
 
-# Start development server
+# 2. Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# 3. Install dependencies
+pip install django djangorestframework django-cors-headers pillow
+
+# 4. Run migrations
+python manage.py makemigrations
+python manage.py migrate
+
+# 5. Populate demo data
+python manage.py populate_data
+
+# 6. Create superuser (for admin panel)
+python manage.py createsuperuser
+
+# 7. Run development server
+python manage.py runserver
+```
+
+Backend will be available at `http://localhost:8000`
+Admin panel at `http://localhost:8000/admin`
+
+### Frontend Setup
+
+```bash
+# 1. Navigate to frontend directory
+cd frontend
+
+# 2. Install dependencies
+npm install react react-dom lucide-react
+
+# 3. Install development tools
+npm install -D vite @vitejs/plugin-react
+
+# 4. Create vite.config.js
+cat > vite.config.js << 'EOF'
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 3000
+  }
+})
+EOF
+
+# 5. Update package.json scripts
+npm pkg set scripts.dev="vite"
+npm pkg set scripts.build="vite build"
+npm pkg set scripts.preview="vite preview"
+
+# 6. Create index.html
+cat > index.html << 'EOF'
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vibegram - Instagram Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+EOF
+
+# 7. Create main.jsx
+cat > src/main.jsx << 'EOF'
+import React from 'react'
+import ReactDOM from 'reactDOM/client'
+import App from './App'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)
+EOF
+
+# 8. Start development server
 npm run dev
 ```
 
-The app will automatically open at **http://localhost:3000**
-
-### Build for Production
-
-```bash
-# Create optimized production build
-npm run build
-
-# Preview production build
-npm run preview
-```
+Frontend will be available at `http://localhost:3000`
 
 ---
 
 ## 📁 Project Structure
 
 ```
-task-5-social_media_clone/
-├── src/
-│   ├── social-media-feed-item.jsx    # Main component with demo
-│   ├── additional-shaders.js         # 6 bonus shader effects
-│   ├── App.jsx                        # Root app component
-│   ├── App.css                        # Global styles
-│   ├── main.jsx                       # Entry point
-│   └── index.css                      # Base CSS
-├── public/                            # Static assets
-├── index.html                         # HTML entry point
-├── vite.config.js                     # Vite configuration
-├── package.json                       # Dependencies
-└── README.md                          # This file
+vibegram-instagram-clone/
+├── api/                          # Django app
+│   ├── migrations/               # Database migrations
+│   ├── management/commands/      # Custom management commands
+│   │   └── populate_data.py     # Demo data population
+│   ├── admin.py                 # Admin interface config
+│   ├── models.py                # Database models
+│   ├── serializers.py           # DRF serializers
+│   ├── views.py                 # API endpoints
+│   └── urls.py                  # API routing
+├── vibegram_backend/             # Django project
+│   ├── settings.py              # Project settings
+│   ├── urls.py                  # Main URL routing
+│   └── wsgi.py                  # WSGI config
+├── frontend/                     # React app
+│   ├── src/
+│   │   ├── App.jsx              # Main React component
+│   │   └── main.jsx             # Entry point
+│   ├── package.json             # Dependencies
+│   └── vite.config.js           # Vite configuration
+├── db.sqlite3                    # SQLite database
+└── manage.py                     # Django management
+
 ```
 
 ---
 
-## 🎮 Usage Examples
+## 🔌 API Endpoints
 
-### Basic Implementation
+### Users
+- `GET /api/users/` - List all users
+- `GET /api/users/{id}/` - Get user details
+- `PATCH /api/users/{id}/` - Update user profile
+- `GET /api/users/{id}/posts/` - Get user's posts
+- `GET /api/users/{id}/followers/` - Get followers
+- `GET /api/users/{id}/following/` - Get following
+- `GET /api/users/?search=query` - Search users
 
-```jsx
-import { SocialMediaFeedItem } from './social-media-feed-item';
+### Posts
+- `GET /api/posts/` - List all posts
+- `POST /api/posts/` - Create new post
+- `GET /api/posts/{id}/` - Get post details
+- `POST /api/posts/{id}/like/` - Like a post
+- `POST /api/posts/{id}/unlike/` - Unlike a post
+- `GET /api/posts/{id}/comments/` - Get post comments
+- `GET /api/posts/feed/` - Get personalized feed
 
-function MyFeed() {
-  const post = {
-    id: 1,
-    imageUrl: 'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=800',
-    username: 'creative_studio',
-    caption: 'Exploring liquid motion in WebGL',
-    likes: 1247,
-    timestamp: '2h ago'
-  };
+### Comments
+- `GET /api/comments/` - List all comments
+- `POST /api/comments/` - Create new comment
+- `DELETE /api/comments/{id}/` - Delete comment
 
-  return <SocialMediaFeedItem post={post} />;
-}
+### Stories
+- `GET /api/stories/` - List active stories
+- `POST /api/stories/` - Create new story
+- `DELETE /api/stories/{id}/` - Delete story
+
+### Messages
+- `GET /api/messages/` - List all messages
+- `POST /api/messages/` - Send message
+- `GET /api/messages/conversations/` - Get conversation list
+- `GET /api/messages/with_user/?user_id=X` - Get messages with specific user
+
+### Follows
+- `GET /api/follows/` - List all follows
+- `POST /api/follows/` - Follow user
+- `DELETE /api/follows/{id}/` - Unfollow user
+
+---
+
+## 💾 Database Schema
+
+### User Model
+```python
+- id (AutoField)
+- username (CharField)
+- email (EmailField)
+- first_name (CharField)
+- last_name (CharField)
+- bio (TextField)
+- avatar (URLField)
+- followers_count (IntegerField)
+- following_count (IntegerField)
 ```
 
-### Using Different Shaders
-
-```jsx
-// Available shader types:
-// - liquidDistortion (default)
-// - glassRefraction
-// - magneticField
-// - kaleidoscope
-// - rgbSplit
-// - pixelSort
-// - bubbleLens
-
-<SocialMediaFeedItem 
-  post={post} 
-  shaderType="kaleidoscope" 
-/>
+### Post Model
+```python
+- id (AutoField)
+- user (ForeignKey → User)
+- image (URLField)
+- caption (TextField)
+- location (CharField)
+- likes_count (IntegerField)
+- comments_count (IntegerField)
+- created_at (DateTimeField)
+- updated_at (DateTimeField)
 ```
 
-### Multiple Feed Items
+### Comment, Like, Story, Follow, Message
+See `api/models.py` for complete schema.
 
-```jsx
-const posts = [
-  { id: 1, imageUrl: '...', username: 'user1', ... },
-  { id: 2, imageUrl: '...', username: 'user2', ... },
-  { id: 3, imageUrl: '...', username: 'user3', ... }
-];
+---
 
-return (
-  <div>
-    {posts.map(post => (
-      <SocialMediaFeedItem key={post.id} post={post} />
-    ))}
-  </div>
-);
+## 🎨 UI/UX Features
+
+### Animations
+- Slide-up fade on scroll
+- Staggered grid loading
+- Smooth transitions
+- Hover scale effects
+- Double-tap heart animation
+- Story ring gradients
+
+### Responsive Design
+- Mobile-first approach
+- Adaptive navigation (bottom nav on mobile, sidebar on desktop)
+- Responsive grid layouts
+- Touch-optimized interactions
+
+### Performance
+- Intersection Observer for lazy loading
+- Image optimization
+- Minimal re-renders
+- Efficient state management
+
+---
+
+## 🧪 Testing
+
+### Test the Backend
+
+```bash
+# Test API endpoints
+python manage.py test
+
+# Access admin panel
+python manage.py runserver
+# Visit http://localhost:8000/admin
+
+# Test individual endpoints with curl
+curl http://localhost:8000/api/posts/feed/
+curl http://localhost:8000/api/users/
+curl http://localhost:8000/api/stories/
+```
+
+### Test the Frontend
+
+1. Open `http://localhost:3000`
+2. Navigate through different views (Home, Search, Explore, Reels, Messages, Profile)
+3. Test interactions:
+   - Like/unlike posts
+   - Create new posts
+   - Edit profile
+   - Search for users
+   - View stories
+   - Send messages
+
+---
+
+## 🚢 Deployment
+
+### Backend (Django)
+
+#### Option 1: Heroku
+```bash
+# Install dependencies
+pip install gunicorn dj-database-url whitenoise
+
+# Create Procfile
+echo "web: gunicorn vibegram_backend.wsgi" > Procfile
+
+# Create runtime.txt
+echo "python-3.11.0" > runtime.txt
+
+# Update settings.py for production
+# - Set DEBUG = False
+# - Add Heroku domain to ALLOWED_HOSTS
+# - Configure database with dj-database-url
+
+# Deploy
+heroku create vibegram-app
+git push heroku main
+heroku run python manage.py migrate
+heroku run python manage.py populate_data
+```
+
+#### Option 2: Railway/Render
+Similar to Heroku, update settings and deploy via Git.
+
+### Frontend (React)
+
+#### Option 1: Vercel
+```bash
+npm run build
+# Deploy dist/ folder to Vercel
+# Update API_BASE_URL to production backend URL
+```
+
+#### Option 2: Netlify
+```bash
+npm run build
+# Deploy dist/ folder to Netlify
 ```
 
 ---
 
-## 🎨 Customizing Shaders
+## 🛠️ Development Tips
 
-### Adding a New Shader Effect
+### Adding New Features
 
-1. Open `src/social-media-feed-item.jsx`
-2. Add your shader to the `SHADER_CONFIGS` object:
+1. **Backend**: Add model → Create migration → Update serializer → Create view → Add URL
+2. **Frontend**: Update API helper → Create component → Add to view router
 
-```javascript
-const SHADER_CONFIGS = {
-  // ... existing shaders
-  
-  myCustomShader: {
-    vertexShader: `
-      varying vec2 vUv;
-      void main() {
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      uniform sampler2D uTexture;
-      uniform vec2 uMouse;
-      uniform float uTime;
-      uniform float uHoverIntensity;
-      varying vec2 vUv;
-      
-      void main() {
-        vec2 uv = vUv;
-        // Your custom shader logic here
-        gl_FragColor = texture2D(uTexture, uv);
-      }
-    `,
-    uniforms: {
-      uTexture: { value: null },
-      uMouse: { value: new THREE.Vector2(0.5, 0.5) },
-      uTime: { value: 0 },
-      uHoverIntensity: { value: 0 }
-    }
-  }
-};
+### Common Issues
+
+**CORS Errors**: Ensure `django-cors-headers` is installed and `CORS_ALLOW_ALL_ORIGINS = True` in settings
+
+**Port Already in Use**: 
+```bash
+# Kill process on port 8000
+lsof -ti:8000 | xargs kill -9
 ```
 
-3. Use it:
-
-```jsx
-<SocialMediaFeedItem post={post} shaderType="myCustomShader" />
-```
-
-### Using Pre-built Additional Shaders
-
-Import the additional shaders and merge them:
-
-```javascript
-import { ADDITIONAL_SHADERS } from './additional-shaders';
-
-const SHADER_CONFIGS = {
-  liquidDistortion: { /* ... */ },
-  ...ADDITIONAL_SHADERS  // Adds 6 more shader effects
-};
-```
+**Database Locked**: Close all connections and restart server
 
 ---
 
-## 🎯 Shader Effects Gallery
+## 📝 Future Enhancements
 
-### 1. Liquid Distortion (Default)
-Organic noise-based distortion with chromatic aberration on hover
-```jsx
-<SocialMediaFeedItem post={post} shaderType="liquidDistortion" />
-```
-
-### 2. Glass Refraction
-Smooth glass-like refraction with radial waves
-```jsx
-<SocialMediaFeedItem post={post} shaderType="glassRefraction" />
-```
-
-### 3. Magnetic Field
-Magnetic pull effect with circular motion
-```jsx
-<SocialMediaFeedItem post={post} shaderType="magneticField" />
-```
-
-### 4. Kaleidoscope
-Symmetrical patterns with animated rotation
-```jsx
-<SocialMediaFeedItem post={post} shaderType="kaleidoscope" />
-```
-
-### 5. RGB Split
-Chromatic aberration with animated color channel separation
-```jsx
-<SocialMediaFeedItem post={post} shaderType="rgbSplit" />
-```
-
-### 6. Pixel Sort
-Glitch-style pixel sorting with scan lines
-```jsx
-<SocialMediaFeedItem post={post} shaderType="pixelSort" />
-```
-
-### 7. Bubble Lens
-Magnifying bubble lens with color fringing
-```jsx
-<SocialMediaFeedItem post={post} shaderType="bubbleLens" />
-```
+- [ ] Real authentication (JWT/OAuth)
+- [ ] WebSocket for real-time messaging
+- [ ] Video upload for Reels
+- [ ] Push notifications
+- [ ] Image filters and editing
+- [ ] Hashtag system
+- [ ] Saved posts collection
+- [ ] Multiple image carousel
+- [ ] Story replies
+- [ ] Direct message reactions
 
 ---
 
-## ⚙️ Configuration
+## 👨‍💻 Author
 
-### Customizing GSAP Animations
-
-Edit the ScrollTrigger settings in `social-media-feed-item.jsx`:
-
-```javascript
-const tl = gsap.timeline({
-  scrollTrigger: {
-    trigger: container,
-    start: 'top 80%',        // When animation starts
-    end: 'top 20%',          // When animation ends
-    toggleActions: 'play none none reverse',
-    scrub: false,            // Set to true for scroll-linked animation
-    markers: false           // Set to true for debugging
-  }
-});
-```
-
-### Adjusting Stagger Timing
-
-```javascript
-.from(content.querySelectorAll('.post-action'), {
-  opacity: 0,
-  scale: 0.8,
-  duration: 0.5,      // Animation duration
-  stagger: 0.1,       // Delay between each element
-  ease: 'back.out(1.7)'  // Easing function
-}, '-=0.3');
-```
-
-### Customizing Colors & Typography
-
-Edit the inline styles in `social-media-feed-item.jsx`:
-
-```javascript
-<style jsx>{`
-  .feed-item {
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-    /* Change background gradient */
-  }
-  
-  .username {
-    font-family: 'Epilogue', -apple-system, sans-serif;
-    /* Change font family */
-    color: #ffffff;
-    /* Change text color */
-  }
-`}</style>
-```
-
----
-
-## 🔧 Performance Optimization
-
-### For Mobile Devices
-
-```javascript
-// Detect mobile and reduce shader quality
-const isMobile = window.innerWidth < 768;
-const shaderType = isMobile ? 'liquidDistortion' : 'kaleidoscope';
-
-<SocialMediaFeedItem post={post} shaderType={shaderType} />
-```
-
-### Reduce Canvas Quality
-
-```jsx
-<Canvas 
-  dpr={[1, 2]}              // Limit pixel ratio
-  frameloop="demand"        // Render only when needed
-  performance={{ min: 0.5 }} // Adaptive performance
->
-  <LiquidImage imageUrl={post.imageUrl} />
-</Canvas>
-```
-
-### Optimize Images
-
-- Use WebP format
-- Recommended size: 800x800px
-- Enable CDN caching
-- Use lazy loading for off-screen items
-
----
-
-## 🌐 Browser Support
-
-| Browser | Version | Support |
-|---------|---------|---------|
-| Chrome  | 90+     | ✅ Full |
-| Firefox | 88+     | ✅ Full |
-| Safari  | 15+     | ✅ Full |
-| Edge    | 90+     | ✅ Full |
-| Mobile Safari | 15+ | ⚠️ Limited (no hover) |
-| Chrome Mobile | 90+ | ⚠️ Limited (no hover) |
-
-### Required Browser Features
-- WebGL 2.0
-- ES6 modules
-- CSS Grid & Flexbox
-- CSS Custom Properties
-
----
-
-## 📦 Dependencies
-
-```json
-{
-  "react": "^18.2.0",
-  "react-dom": "^18.2.0",
-  "three": "^0.160.0",
-  "@react-three/fiber": "^8.15.0",
-  "@react-three/drei": "^9.95.0",
-  "gsap": "^3.12.5"
-}
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Textures Not Loading
-
-**Problem**: Images don't appear or show broken texture  
-**Solution**: Check CORS settings and use a proxy if needed
-
-```javascript
-const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(imageUrl)}`;
-<LiquidImage imageUrl={proxyUrl} />
-```
-
-### Performance Issues
-
-**Problem**: Low FPS or laggy animations  
-**Solution**: Reduce shader complexity
-
-```javascript
-// Lower shader quality
-material.uniforms.uQuality = { value: 0.5 };
-
-// Disable effects on mobile
-const enableEffects = !('ontouchstart' in window);
-```
-
-### Scroll Animations Not Triggering
-
-**Problem**: GSAP animations don't play  
-**Solution**: Refresh ScrollTrigger after content loads
-
-```javascript
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-useEffect(() => {
-  ScrollTrigger.refresh();
-}, []);
-```
-
-### WebGL Context Lost
-
-**Problem**: Canvas goes black  
-**Solution**: Add context restoration
-
-```javascript
-<Canvas onCreated={({ gl }) => {
-  gl.domElement.addEventListener('webglcontextlost', (e) => {
-    e.preventDefault();
-    setTimeout(() => {
-      gl.forceContextRestore();
-    }, 100);
-  });
-}} />
-```
-
----
-
-## 🎓 Learning Resources
-
-### WebGL Shaders
-- [The Book of Shaders](https://thebookofshaders.com/)
-- [Shadertoy](https://www.shadertoy.com/)
-- [WebGL Fundamentals](https://webglfundamentals.org/)
-
-### React Three Fiber
-- [Official Docs](https://docs.pmnd.rs/react-three-fiber)
-- [drei Components](https://github.com/pmndrs/drei)
-
-### GSAP
-- [GSAP Docs](https://greensock.com/docs/)
-- [ScrollTrigger](https://greensock.com/docs/v3/Plugins/ScrollTrigger)
-
----
-
-## 🤝 Contributing
-
-Feel free to submit issues and enhancement requests!
+**Vibecode Intern**
+- GitHub: [Your GitHub]
+- LinkedIn: [Your LinkedIn]
+- Email: intern@vibecode.com
 
 ---
 
 ## 📄 License
 
-MIT License - feel free to use in your projects!
+This project is created for educational purposes as part of the Vibecode Internship Program.
 
 ---
 
-## 🙏 Credits
+## 🙏 Acknowledgments
 
-- **Shader Techniques**: Adapted from classic Simplex noise algorithms
-- **Fonts**: Epilogue, Crimson Pro, JetBrains Mono (Google Fonts)
-- **Framework**: Built with React Three Fiber & GSAP
-- **Sample Images**: Unsplash
-
----
-
-## 💡 Pro Tips
-
-1. **Start Simple**: Begin with the default `liquidDistortion` shader
-2. **Experiment**: Try all 7 shader effects to see what fits your style
-3. **Customize**: Adjust colors, fonts, and timing to match your brand
-4. **Optimize**: Test on mobile devices and adjust performance settings
-5. **Monitor Performance**: Use browser DevTools to check FPS
-6. **Learn Shaders**: Modify the GLSL code to create unique effects
+- Instagram for UI/UX inspiration
+- Vibecode for the internship opportunity
+- React and Django communities
 
 ---
 
-**Made with ❤️ using React, Three.js, and GSAP**
-
-For questions or issues, check the troubleshooting section or open an issue on GitHub.
+**Made with ❤️ in Lucknow, UP**
