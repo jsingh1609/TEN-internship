@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skills Recommendation System</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        .skill-badge {
+            transition: all 0.3s ease;
+        }
+        .skill-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const API_BASE = 'http://localhost:5000/api';
+
+        function App() {
+            const [step, setStep] = useState(1);
+            const [roles, setRoles] = useState([]);
+            const [allSkills, setAllSkills] = useState([]);
+            const [formData, setFormData] = useState({
+                currentSkills: [],
+                targetRole: '',
+                experienceLevel: 'intermediate',
+                timeline: 6
+            });
+            const [recommendations, setRecommendations] = useState(null);
+            const [loading, setLoading] = useState(false);
+            const [skillSearch, setSkillSearch] = useState('');
+
+            useEffect(() => {
+                fetchInitialData();
+            }, []);
+
+            const fetchInitialData = async () => {
+                try {
+                    const [rolesRes, skillsRes] = await Promise.all([
+                        fetch(`${API_BASE}/roles`),
+                        fetch(`${API_BASE}/skills`)
+                    ]);
+                    const rolesData = await rolesRes.json();
+                    const skillsData = await skillsRes.json();
+                    setRoles(rolesData.roles);
+                    setAllSkills(skillsData.skills);
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
+            };
+
+            const handleSkillToggle = (skill) => {
+                setFormData(prev => ({
+                    ...prev,
+                    currentSkills: prev.currentSkills.includes(skill)
+                        ? prev.currentSkills.filter(s => s !== skill)
+                        : [...prev.currentSkills, skill]
+                }));
+            };
+
+            const handleSubmit = async () => {
+                setLoading(true);
+                try {
+                    const response = await fetch(`${API_BASE}/recommend`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            current_skills: formData.currentSkills,
+                            target_role: formData.targetRole,
+                            experience_level: formData.experienceLevel,
+                            timeline: formData.timeline
+                        })
+                    });
+                    const data = await response.json();
+                    setRecommendations(data);
+                    setStep(3);
+                } catch (error) {
+                    console.error('Error getting recommendations:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const filteredSkills = allSkills.filter(skill =>
+                skill.toLowerCase().includes(skillSearch.toLowerCase())
+            );
+
+            return (
+                <div className="min-h-screen py-8 px-4">
+                    <div className="max-w-6xl mx-auto">
+                        {/* Header */}
+                        <div className="text-center mb-8 animate-fade-in">
+                            <h1 className="text-5xl font-bold text-white mb-3">
+                                🎯 Skills Recommendation System
+                            </h1>
+                            <p className="text-xl text-white opacity-90">
+                                Plan your career path with AI-powered recommendations
+                            </p>
+                        </div>
+
+                        {/* Progress Steps */}
+                        <div className="flex justify-center mb-8">
+                            <div className="flex items-center space-x-4">
+                                {[1, 2, 3].map((s) => (
+                                    <React.Fragment key={s}>
+                                        <div className={`flex items-center justify-center w-12 h-12 rounded-full font-bold text-lg ${
+                                            step >= s ? 'bg-white text-purple-600' : 'bg-purple-300 text-white'
+                                        } transition-all duration-300`}>
+                                            {s}
+                                        </div>
+                                        {s < 3 && (
+                                            <div className={`w-16 h-1 ${
+                                                step > s ? 'bg-white' : 'bg-purple-300'
+                                            } transition-all duration-300`} />
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Step 1: Current Skills */}
+                        {step === 1 && (
+                            <div className="glass-card p-8 animate-fade-in">
+                                <h2 className="text-3xl font-bold mb-6 text-gray-800">
+                                    What skills do you currently have?
+                                </h2>
+                                <input
+                                    type="text"
+                                    placeholder="🔍 Search skills..."
+                                    className="w-full p-4 mb-6 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                                    value={skillSearch}
+                                    onChange={(e) => setSkillSearch(e.target.value)}
+                                />
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6 max-h-96 overflow-y-auto">
+                                    {filteredSkills.map((skill) => (
+                                        <button
+                                            key={skill}
+                                            onClick={() => handleSkillToggle(skill)}
+                                            className={`skill-badge p-3 rounded-lg text-sm font-medium ${
+                                                formData.currentSkills.includes(skill)
+                                                    ? 'bg-purple-600 text-white'
+                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {skill}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="mb-4">
+                                    <span className="text-lg font-semibold text-gray-700">
+                                        Selected: {formData.currentSkills.length} skills
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={() => setStep(2)}
+                                    disabled={formData.currentSkills.length === 0}
+                                    className="w-full bg-purple-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    Next: Choose Target Role →
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Step 2: Target Role & Preferences */}
+                        {step === 2 && (
+                            <div className="glass-card p-8 animate-fade-in">
+                                <h2 className="text-3xl font-bold mb-6 text-gray-800">
+                                    What's your target role?
+                                </h2>
+                                
+                                <div className="mb-6">
+                                    <label className="block text-lg font-semibold mb-3 text-gray-700">
+                                        Target Career Role
+                                    </label>
+                                    <select
+                                        value={formData.targetRole}
+                                        onChange={(e) => setFormData({...formData, targetRole: e.target.value})}
+                                        className="w-full p-4 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-purple-500 text-lg"
+                                    >
+                                        <option value="">Select a role...</option>
+                                        {roles.map((role) => (
+                                            <option key={role} value={role}>{role}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="mb-6">
+                                    <label className="block text-lg font-semibold mb-3 text-gray-700">
+                                        Your Experience Level
+                                    </label>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {['beginner', 'intermediate', 'advanced'].map((level) => (
+                                            <button
+                                                key={level}
+                                                onClick={() => setFormData({...formData, experienceLevel: level})}
+                                                className={`p-4 rounded-lg font-medium capitalize ${
+                                                    formData.experienceLevel === level
+                                                        ? 'bg-purple-600 text-white'
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                {level}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="mb-6">
+                                    <label className="block text-lg font-semibold mb-3 text-gray-700">
+                                        Timeline: {formData.timeline} months
+                                    </label>
+                                    <input
+                                        type="range"
+                                        min="3"
+                                        max="24"
+                                        value={formData.timeline}
+                                        onChange={(e) => setFormData({...formData, timeline: parseInt(e.target.value)})}
+                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                    />
+                                    <div className="flex justify-between text-sm text-gray-600 mt-2">
+                                        <span>3 months</span>
+                                        <span>24 months</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex space-x-4">
+                                    <button
+                                        onClick={() => setStep(1)}
+                                        className="flex-1 bg-gray-200 text-gray-700 py-4 rounded-lg font-semibold text-lg hover:bg-gray-300 transition-colors"
+                                    >
+                                        ← Back
+                                    </button>
+                                    <button
+                                        onClick={handleSubmit}
+                                        disabled={!formData.targetRole || loading}
+                                        className="flex-1 bg-purple-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        {loading ? 'Analyzing...' : 'Get Recommendations →'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 3: Recommendations */}
+                        {step === 3 && recommendations && (
+                            <div className="space-y-6 animate-fade-in">
+                                {/* Summary Card */}
+                                <div className="glass-card p-8">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div>
+                                            <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                                                Your Learning Path
+                                            </h2>
+                                            <p className="text-xl text-gray-600">
+                                                for {recommendations.target_role}
+                                            </p>
+                                        </div>
+                                        <div className="text-center">
+                                            <CircularProgress 
+                                                percentage={Math.round(recommendations.completion_percentage)} 
+                                            />
+                                            <p className="text-sm text-gray-600 mt-2">Ready</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="bg-blue-50 p-4 rounded-lg">
+                                            <div className="text-3xl font-bold text-blue-600">
+                                                {recommendations.total_missing_skills}
+                                            </div>
+                                            <div className="text-sm text-gray-600">Skills to Learn</div>
+                                        </div>
+                                        <div className="bg-green-50 p-4 rounded-lg">
+                                            <div className="text-3xl font-bold text-green-600">
+                                                {recommendations.estimated_timeline_months}
+                                            </div>
+                                            <div className="text-sm text-gray-600">Months Estimated</div>
+                                        </div>
+                                        <div className="bg-purple-50 p-4 rounded-lg">
+                                            <div className="text-3xl font-bold text-purple-600">
+                                                ${(recommendations.role_info.avg_salary / 1000).toFixed(0)}k
+                                            </div>
+                                            <div className="text-sm text-gray-600">Avg Salary</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Learning Phases */}
+                                <div className="glass-card p-8">
+                                    <h3 className="text-2xl font-bold mb-6 text-gray-800">
+                                        📅 Learning Phases
+                                    </h3>
+                                    <div className="space-y-4">
+                                        {recommendations.learning_phases.map((phase) => (
+                                            <div key={phase.phase} className="border-l-4 border-purple-500 pl-6 py-4 bg-purple-50 rounded-r-lg">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <h4 className="text-xl font-bold text-gray-800">
+                                                        Phase {phase.phase}: {phase.title}
+                                                    </h4>
+                                                    <span className="text-sm font-medium text-purple-600 bg-white px-3 py-1 rounded-full">
+                                                        {phase.duration_months} months
+                                                    </span>
+                                                </div>
+                                                <div className="flex flex-wrap gap-2 mt-3">
+                                                    {phase.skills.map((skill) => (
+                                                        <span key={skill} className="bg-white text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+                                                            {skill}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Top Recommendations */}
+                                <div className="glass-card p-8">
+                                    <h3 className="text-2xl font-bold mb-6 text-gray-800">
+                                        🎯 Top Skill Recommendations
+                                    </h3>
+                                    <div className="space-y-4">
+                                        {recommendations.recommendations.slice(0, 5).map((rec, idx) => (
+                                            <SkillCard key={idx} recommendation={rec} rank={idx + 1} />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={() => {
+                                        setStep(1);
+                                        setRecommendations(null);
+                                        setFormData({
+                                            currentSkills: [],
+                                            targetRole: '',
+                                            experienceLevel: 'intermediate',
+                                            timeline: 6
+                                        });
+                                    }}
+                                    className="w-full bg-gray-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-gray-700 transition-colors"
+                                >
+                                    Start Over
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function CircularProgress({ percentage }) {
+            const radius = 40;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (percentage / 100) * circumference;
+
+            return (
+                <svg width="100" height="100">
+                    <circle
+                        cx="50"
+                        cy="50"
+                        r={radius}
+                        fill="none"
+                        stroke="#e5e7eb"
+                        strokeWidth="8"
+                    />
+                    <circle
+                        cx="50"
+                        cy="50"
+                        r={radius}
+                        fill="none"
+                        stroke="#8b5cf6"
+                        strokeWidth="8"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={offset}
+                        className="progress-ring"
+                    />
+                    <text
+                        x="50"
+                        y="50"
+                        textAnchor="middle"
+                        dy="7"
+                        className="text-2xl font-bold fill-gray-800"
+                    >
+                        {percentage}%
+                    </text>
+                </svg>
+            );
+        }
+
+        function SkillCard({ recommendation, rank }) {
+            const difficultyColors = {
+                beginner: 'bg-green-100 text-green-800',
+                intermediate: 'bg-yellow-100 text-yellow-800',
+                advanced: 'bg-red-100 text-red-800'
+            };
+
+            return (
+                <div className="bg-white border-2 border-gray-200 rounded-lg p-5 hover:border-purple-400 transition-all">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center">
+                            <span className="text-2xl font-bold text-purple-600 mr-3">#{rank}</span>
+                            <div>
+                                <h4 className="text-xl font-bold text-gray-800">{recommendation.skill}</h4>
+                                <p className="text-sm text-gray-600">{recommendation.category}</p>
+                            </div>
+                        </div>
+                        {recommendation.is_required && (
+                            <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                REQUIRED
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mb-3">
+                        <span className={`text-xs font-medium px-3 py-1 rounded-full ${difficultyColors[recommendation.difficulty]}`}>
+                            {recommendation.difficulty}
+                        </span>
+                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
+                            ⏱️ {recommendation.time_to_learn_months} months
+                        </span>
+                        <span className="bg-purple-100 text-purple-800 text-xs font-medium px-3 py-1 rounded-full">
+                            📊 {recommendation.market_demand}% demand
+                        </span>
+                    </div>
+
+                    {recommendation.prerequisites.length > 0 && (
+                        <div className="mb-2">
+                            <span className="text-xs font-semibold text-gray-600">Prerequisites: </span>
+                            {recommendation.prerequisites.map((prereq, i) => (
+                                <span key={i} className="text-xs text-gray-600">
+                                    {prereq}{i < recommendation.prerequisites.length - 1 ? ', ' : ''}
+                                </span>
+                            ))}
+                            {!recommendation.prerequisites_met && (
+                                <span className="ml-2 text-xs text-red-600 font-medium">⚠️ Not met</span>
+                            )}
+                        </div>
+                    )}
+
+                    <p className="text-sm text-gray-700 mt-2">
+                        <span className="font-medium">Why learn this:</span> {recommendation.reason}
+                    </p>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
