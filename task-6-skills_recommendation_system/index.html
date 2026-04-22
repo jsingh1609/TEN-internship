@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loading Skill Core...</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root {
+      --bg-dark: #1b1b1a;
+      --text-main: #f5f5f5;
+      --text-sub: #888888;
+      --line-color: #333333;
+      --accent-color: #e2e2e2;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* Particle Canvas */
+    #particleCanvas {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Corner Brackets */
+    .bracket {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-color: rgba(255, 255, 255, 0.1);
+      border-style: solid;
+      border-width: 0;
+      z-index: 1;
+    }
+    .bracket-tl { top: 40px; left: 40px; border-top-width: 1px; border-left-width: 1px; }
+    .bracket-tr { top: 40px; right: 40px; border-top-width: 1px; border-right-width: 1px; }
+    .bracket-bl { bottom: 40px; left: 40px; border-bottom-width: 1px; border-left-width: 1px; }
+    .bracket-br { bottom: 40px; right: 40px; border-bottom-width: 1px; border-right-width: 1px; }
+
+    /* Center Container */
+    .loader-container {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeIn 1.5s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Spinning Icon & Ripples */
+    .icon-wrapper {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .ripple-1, .ripple-2 {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .ripple-1 {
+      inset: 5px;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    .ripple-2 {
+      inset: -5px;
+    }
+
+    .stars-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 2;
+    }
+
+    .center-star {
+      width: 40px;
+      height: 40px;
+      color: var(--text-main);
+      animation: spinSlow 8s linear infinite;
+    }
+
+    .side-star {
+      width: 24px;
+      height: 24px;
+      color: var(--text-main);
+      animation: spinSlow 12s linear infinite reverse;
+      opacity: 0.7;
+    }
+
+    @keyframes spinSlow {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Typography */
+    .title {
+      font-family: "Georgia", serif;
+      font-size: 2rem;
+      font-weight: 400;
+      margin: 0 0 12px 0;
+      letter-spacing: 0.05em;
+    }
+
+    .subtitle {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      margin: 0 0 32px 0;
+    }
+
+    /* Progress Section */
+    .progress-section {
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 1px;
+      background-color: var(--line-color);
+      position: relative;
+    }
+
+    .progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background-color: var(--accent-color);
+      transition: width 0.1s linear;
+      box-shadow: 0 0 8px rgba(255,255,255,0.4);
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      color: var(--text-sub);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Fade out transition */
+    .fade-out {
+      animation: fadeOut 0.8s ease-in forwards !important;
+    }
+    
+    @keyframes fadeOut {
+      to { opacity: 0; transform: scale(1.05); }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Particle Background -->
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- Framing Brackets -->
+  <div class="bracket bracket-tl"></div>
+  <div class="bracket bracket-tr"></div>
+  <div class="bracket bracket-bl"></div>
+  <div class="bracket bracket-br"></div>
+
+  <!-- Loading Content -->
+  <div id="loaderOverlay" class="loader-container">
+    
+    <div class="icon-wrapper">
+      <div class="ripple-1"></div>
+      <div class="ripple-2"></div>
+      <div class="stars-container">
+        <svg class="side-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+          <polygon points="12.00,2.00 14.00,8.54 20.66,7.00 16.00,12.00 20.66,17.00 14.00,15.46 12.00,22.00 10.00,15.46 3.34,17.00 8.00,12.00 3.34,7.00 10.00,8.54" />
+        </svg>
+        <svg class="center-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+          <polygon points="12.00,1.00 13.53,8.30 19.78,4.22 15.70,10.47 23.00,12.00 15.70,13.53 19.78,19.78 13.53,15.70 12.00,23.00 10.47,15.70 4.22,19.78 8.30,13.53 1.00,12.00 8.30,10.47 4.22,4.22 10.47,8.30" />
+        </svg>
+        <svg class="side-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+          <polygon points="12.00,2.00 14.00,8.54 20.66,7.00 16.00,12.00 20.66,17.00 14.00,15.46 12.00,22.00 10.00,15.46 3.34,17.00 8.00,12.00 3.34,7.00 10.00,8.54" />
+        </svg>
+      </div>
+    </div>
+
+    <h1 class="title">SKILL CORE</h1>
+    <p class="subtitle">TOPOGRAPHICAL ENGINE</p>
+
+    <div class="progress-section">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-labels">
+        <span>INITIALIZING</span>
+        <span>SYSTEM READY</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Particle Background Logic
+      const canvas = document.getElementById('particleCanvas');
+      const ctx = canvas.getContext('2d');
+      let width, height;
+      const particles = [];
+      const particleCount = 40;
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      for(let i=0; i<particleCount; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.2,
+          vy: (Math.random() - 0.5) * 0.2,
+          size: Math.random() * 1.5 + 0.5,
+          alpha: Math.random() * 0.4 + 0.1
+        });
+      }
+
+      function drawParticles() {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          if(p.x < 0) p.x = width;
+          if(p.x > width) p.x = 0;
+          if(p.y < 0) p.y = height;
+          if(p.y > height) p.y = 0;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+          ctx.fill();
+        });
+        requestAnimationFrame(drawParticles);
+      }
+      drawParticles();
+
+      // 2. Loading Progress Logic
+      const bar = document.getElementById('progressFill');
+      const loaderOverlay = document.getElementById('loaderOverlay');
+      
+      let progress = 0;
+
+      const progressInterval = setInterval(() => {
+        // Slow realistic loading progression
+        progress += Math.random() * 5 + 1;
+        if (progress >= 100) progress = 100;
+        
+        if (bar) bar.style.width = progress + '%';
+
+        if (progress >= 100) {
+          clearInterval(progressInterval);
+          
+          setTimeout(() => {
+            loaderOverlay.classList.add('fade-out');
+            canvas.style.transition = 'opacity 0.8s';
+            canvas.style.opacity = '0';
+            
+            setTimeout(() => {
+              sessionStorage.setItem('justLoaded', 'true');
+              window.location.href = 'home.html';
+            }, 800); 
+          }, 400); 
+        }
+      }, 100);
+    });
+  </script>
+</body>
+</html>
