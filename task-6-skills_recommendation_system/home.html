@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skill Core — Topographical Tech Skill Recommendations</title>
+  <meta name="description"
+    content="Skill Core is a recommendation engine for modern engineers. Pick what you love, and we'll surface the adjacent technologies worth your next 100 hours." />
+  <meta property="og:title" content="Skill Core — Topographical Tech Skill Recommendations" />
+  <meta property="og:description"
+    content="A recommendation engine for modern engineers. Pick what you love, and we'll surface the adjacent technologies worth your next 100 hours." />
+  <meta name="theme-color" content="#0A0A0A" />
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    // If we didn't just come from the loading page, redirect back to it.
+    // This ensures that refreshing home.html starts the loading process again.
+    if (sessionStorage.getItem('justLoaded') !== 'true') {
+      window.location.href = 'index.html';
+    } else {
+      // Clear the flag so that a manual refresh triggers the redirect.
+      sessionStorage.removeItem('justLoaded');
+    }
+  </script>
+</head>
+
+<body>
+
+  <!-- ==================== BACKGROUND ==================== -->
+  <div aria-hidden="true"
+    style="pointer-events: none; position: fixed; inset: 0; z-index: 0; overflow: hidden; background-color: var(--bg-color);">
+    <svg style="position: absolute; height: 0; width: 0;">
+      <filter id="topo-grain">
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"></feTurbulence>
+        <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.18 0"></feColorMatrix>
+      </filter>
+    </svg>
+    <div style="position: absolute; inset: 0; opacity: 0.5; mix-blend-mode: overlay; filter: url(#topo-grain);"></div>
+    <div
+      style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; perspective: 1400px;">
+      <div id="topo-container"
+        style="position: relative; height: 80vmin; width: 80vmin; transform-style: preserve-3d; opacity: 1; transform: rotateX(55deg) rotateZ(0deg);">
+        <!-- Layer 1 -->
+        <div class="topo-layer"
+          style="background: linear-gradient(135deg, rgba(255,255,255,0.04), transparent 70%); box-shadow: inset 0 0 60px rgba(249,115,22,0.05); transform: translateZ(18px);">
+          <div class="topo-grid" style="background-size: 40px 40px;"></div>
+        </div>
+        <!-- Layer 2 -->
+        <div class="topo-layer"
+          style="background: linear-gradient(135deg, rgba(255,255,255,0.07), transparent 70%); box-shadow: inset 0 0 60px rgba(249,115,22,0.09); transform: translateZ(36px);">
+          <div class="topo-grid" style="background-size: 54px 54px;"></div>
+        </div>
+        <!-- Layer 3 -->
+        <div class="topo-layer"
+          style="background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent 70%); box-shadow: inset 0 0 60px rgba(249,115,22,0.13); transform: translateZ(54px);">
+          <div class="topo-grid" style="background-size: 68px 68px;"></div>
+        </div>
+        <!-- Layer 4 -->
+        <div class="topo-layer"
+          style="background: radial-gradient(circle at 30% 30%, rgba(249,115,22,0.3), transparent 60%); box-shadow: inset 0 0 60px rgba(249,115,22,0.17); transform: translateZ(72px);">
+          <div class="topo-grid" style="background-size: 82px 82px;"></div>
+        </div>
+      </div>
+    </div>
+    <div
+      style="position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 25%, var(--bg-color) 90%);">
+    </div>
+  </div>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="main-wrapper" style="animation: fadeIn 1.5s ease-out forwards;">
+
+    <!-- ==================== HEADER ==================== -->
+    <header class="site-header" role="banner">
+      <div class="header-left">
+        <div class="brand">SKILL_CORE</div>
+        <div class="header-meta">
+          SIGNAL: 60+ TECH SKILLS<br>
+          FOCAL DEPTH: ADAPTIVE
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="tagline">tech<span class="dot">.</span><br>topology</div>
+      </div>
+    </header>
+
+    <!-- ==================== HERO ==================== -->
+    <section class="hero" aria-label="Hero">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="hero-canvas-wrap" aria-hidden="true">
+        <canvas id="topoCanvas"></canvas>
+      </div>
+
+      <div class="hero-content">
+        <div class="hero-text animate-fade-in">
+          <p class="hero-label">[ ARCHIVE 2026 ]</p>
+          <h1 class="hero-title">
+            Surface tension &amp;<br>
+            <em>topographical</em> skills.
+          </h1>
+          <p class="hero-subtitle">
+            A recommendation engine for modern engineers. Pick what you love,
+            and we'll surface the adjacent technologies worth your next 100 hours.
+          </p>
+        </div>
+        <a id="exploreBtn" class="explore-btn" href="#sectionSelect" role="button" aria-label="Explore skills">
+          EXPLORE DEPTH
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <polyline points="19 12 12 19 5 12" />
+          </svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- ==================== STEP 01: SELECT ==================== -->
+    <section class="section-select" id="sectionSelect" aria-label="Step 01 — Select Skills">
+      <p class="step-label">[ STEP 01 / SELECT ]</p>
+      <h2 class="section-title animate-fade-in-up">
+        Pick the skills you <em>already love</em>.
+      </h2>
+      <p class="section-subtitle animate-fade-in-up anim-delay-1">
+        Tap any skill to add it to your stack. We'll learn your gravity and recommend what to study next.
+      </p>
+
+      <div class="controls-top">
+        <div id="categoryFilters" class="category-filters" role="group" aria-label="Filter by category"></div>
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input id="searchInput" class="search-input" type="search" placeholder="Search skills or tags..."
+            aria-label="Search skills" autocomplete="off" />
+        </div>
+      </div>
+
+      <div id="skillGrid" class="skill-grid" role="list" aria-label="Available skills"></div>
+    </section>
+
+    <!-- ==================== STEP 02: RECOMMEND ==================== -->
+    <section class="section-recommend" id="sectionRecommend" aria-label="Step 02 — Recommendations">
+      <div class="section-divider" aria-hidden="true"></div>
+      <p class="step-label">[ STEP 02 / RECOMMEND ]</p>
+      <h2 class="section-title">
+        Skills on your <em>event horizon</em>.
+      </h2>
+      <p class="section-subtitle">
+        Based on your stack's gravity, these technologies are in closest orbit — ranked by ecosystem overlap.
+      </p>
+      <div id="recommendGrid" class="recommend-grid" aria-live="polite"></div>
+    </section>
+
+    <!-- ==================== STICKY STACK BAR ==================== -->
+    <div id="stackBar" class="stack-bar" role="region" aria-label="Your selected skill stack">
+      <span class="stack-label">YOUR STACK ·</span>
+      <div id="stackBadges" class="stack-badges" aria-label="Selected skills"></div>
+      <button id="clearStack" class="stack-clear" aria-label="Clear all selected skills">Clear</button>
+    </div>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="site-footer" role="contentinfo">
+    <p>SKILL_CORE &middot; TOPOGRAPHICAL RECOMMENDATIONS &middot; 2025</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
