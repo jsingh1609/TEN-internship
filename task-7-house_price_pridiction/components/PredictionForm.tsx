@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DollarSign, Home, Loader2 } from "lucide-react";
+import { DollarSign, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ export function PredictionForm() {
   const [predictedPrice, setPredictedPrice] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // This is a mock/dummy prediction function.
   const getPrediction = async (features: {
     sqft: number;
     bedrooms: number;
@@ -62,20 +63,13 @@ export function PredictionForm() {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto glassmorphism">
+    <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-primary/10 rounded-lg">
-             <Home className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <CardTitle className="text-2xl font-bold">House Price Predictor</CardTitle>
-            <CardDescription>Estimate a property's value instantly.</CardDescription>
-          </div>
-        </div>
+          <CardTitle className="text-xl">Property Details</CardTitle>
+          <CardDescription>Enter the property features to get an estimate.</CardDescription>
       </CardHeader>
       <form onSubmit={handlePredict}>
-        <CardContent className="space-y-6 pt-2">
+        <CardContent className="space-y-6">
           <div className="grid gap-2">
             <Label htmlFor="sqft">Area (sq. ft.)</Label>
             <Input id="sqft" type="number" value={sqft} onChange={e => setSqft(Number(e.target.value))} placeholder="e.g., 1500" required />
@@ -104,9 +98,9 @@ export function PredictionForm() {
         </CardContent>
         <CardFooter className="flex-col items-start gap-4">
           <motion.div className="w-full" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button type="submit" className="w-full h-12 text-lg font-semibold" disabled={isLoading}>
+            <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={isLoading}>
               {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <DollarSign className="mr-2 h-5 w-5" />}
-              {isLoading ? 'Analyzing...' : 'Predict Price'}
+              {isLoading ? 'Calculating...' : 'Predict Price'}
             </Button>
           </motion.div>
           <AnimatePresence>
@@ -115,11 +109,11 @@ export function PredictionForm() {
                 initial={{ opacity: 0, y: 10, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, y: -10, height: 0 }}
-                className="w-full text-center p-4 mt-2 bg-primary/10 rounded-lg"
+                className="w-full text-center p-4 mt-2 bg-muted rounded-lg border"
               >
-                <p className="text-sm text-muted-foreground">Estimated Value</p>
-                <div className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400">
-                  <span className="mr-1">$</span>
+                <p className="text-sm text-muted-foreground">Estimated Market Value</p>
+                <div className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-fuchsia-500">
+                  <span>$</span>
                   <AnimatedNumber value={predictedPrice} />
                 </div>
               </motion.div>

@@ -9,7 +9,9 @@ type AnimatedNumberProps = {
 
 export function AnimatedNumber({ value }: AnimatedNumberProps) {
   const count = useMotionValue(0);
-  const rounded = useTransform(count, (latest) => Math.round(latest));
+  const rounded = useTransform(count, (latest) =>
+    Math.round(latest).toLocaleString('en-US')
+  );
 
   useEffect(() => {
     const controls = animate(count, value, {

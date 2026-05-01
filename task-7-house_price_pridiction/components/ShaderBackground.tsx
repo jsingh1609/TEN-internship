@@ -17,7 +17,6 @@ const fragmentShaderSource = `
   uniform vec2 u_mouse;
   uniform vec3 u_color;
 
-  // 2D simplex noise function
   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
   vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
   vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
@@ -26,8 +25,7 @@ const fragmentShaderSource = `
     const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
     vec2 i  = floor(v + dot(v, C.yy) );
     vec2 x0 = v -   i + dot(i, C.xx);
-    vec2 i1;
-    i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+    vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
     vec4 x12 = x0.xyxy + C.xxzz;
     x12.xy -= i1;
     i = mod289(i);
@@ -39,9 +37,7 @@ const fragmentShaderSource = `
     vec3 h = abs(x) - 0.5;
     vec3 ox = floor(x + 0.5);
     vec3 a0 = x - ox;
-    m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
-    vec3 g;
-    g.x  = a0.x  * x0.x  + h.x  * x0.y;
+    m *= 1.79284291400159 - 0.85373472095314 * ( aa.x  * x0.x  + h.x  * x0.y;
     g.yz = a0.yz * x12.xz + h.yz * x12.yw;
     return 130.0 * dot(m, g);
   }
@@ -54,15 +50,14 @@ const fragmentShaderSource = `
 
     vec3 color = vec3(0.0);
     float t = u_time * 0.1;
-
     float noise = snoise(st * 3.0 + t);
     
     vec3 p_color = u_color;
-    color = mix(p_color * 0.2, p_color * 0.8, smoothstep(0.1, 0.5, noise));
+    color = mix(p_color * 0.0, p_color * 0.4, smoothstep(0.1, 0.5, noise));
     
     float circle = 1.0 - smoothstep(0.0, 0.3, mouse_dist);
-    color += circle * 0.2;
-
+    color += circle * 0.15;
+    
     gl_FragColor = vec4(color, 1.0);
   }
 `;
@@ -74,8 +69,12 @@ export const ShaderBackground = () => {
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-        const gl = canvas.getContext("webgl");
-        if (!gl) return;
+        // Attempt to get a WebGL context, but fail gracefully if not available.
+        const gl = canvas.getContext("webgl", { antialias: true, failIfMajorPerformanceCaveat: true });
+        if (!gl) {
+            console.warn("WebGL not supported or performance is too low, falling back."); 
+            return;
+        }
 
         const program = initShaderProgram(gl, vertexShaderSource, fragmentShaderSource);
         if (!program) return;
@@ -98,11 +97,14 @@ export const ShaderBackground = () => {
         window.addEventListener('mousemove', handleMouseMove);
 
         let startTime = Date.now();
+        let animationFrameId: number;
         function render() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
+            if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+            }
+            
             gl.clearColor(0, 0, 0, 0);
             gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -121,14 +123,17 @@ export const ShaderBackground = () => {
 
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-            requestAnimationFrame(render);
+            animationFrameId = requestAnimationFrame(render);
         }
         render();
 
-        return () => window.removeEventListener('mousemove', handleMouseMove);
+        return () => {
+             window.removeEventListener('mousemove', handleMouseMove);
+             cancelAnimationFrame(animationFrameId);
+        }
     }, [resolvedTheme]);
 
-    return <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full z-0" />;
+    return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full z-0" />;
 };
 
 function initShaderProgram(gl: WebGLRenderingContext, vsSource: string, fsSource: string) {
