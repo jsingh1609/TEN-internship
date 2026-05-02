@@ -1,740 +1,117 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>GharMol — India House Price Predictor</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-<style>
-  /* ── TOKENS ─────────────────────────────────────────────────────── */
-  :root {
-    --font-display: 'Playfair Display', serif;
-    --font-body:    'DM Sans', sans-serif;
-
-    /* Dark palette */
-    --bg:          #0d0f0e;
-    --bg2:         #141714;
-    --bg3:         #1c1f1d;
-    --card:        #1a1e1c;
-    --card2:       #222622;
-    --border:      #2d332e;
-    --border2:     #3a4039;
-    --text:        #e8ede9;
-    --text2:       #9aaa9b;
-    --text3:       #6a7a6b;
-    --accent:      #c8a96e;
-    --accent2:     #e2c28a;
-    --accent-dim:  rgba(200,169,110,.12);
-    --green:       #6abf8a;
-    --green-dim:   rgba(106,191,138,.13);
-    --red:         #e07070;
-    --shadow:      0 4px 32px rgba(0,0,0,.55);
-    --shadow-sm:   0 2px 12px rgba(0,0,0,.35);
-    --radius:      14px;
-    --radius-sm:   8px;
-  }
-  [data-theme="light"] {
-    --bg:          #f4f1ec;
-    --bg2:         #ede9e1;
-    --bg3:         #e6e0d5;
-    --card:        #faf7f2;
-    --card2:       #f0ece4;
-    --border:      #d8d0c4;
-    --border2:     #c8bfb2;
-    --text:        #1a1a18;
-    --text2:       #5a5545;
-    --text3:       #8a8070;
-    --accent:      #9a6f30;
-    --accent2:     #b8842e;
-    --accent-dim:  rgba(154,111,48,.10);
-    --green:       #2e8a56;
-    --green-dim:   rgba(46,138,86,.12);
-    --red:         #c04444;
-    --shadow:      0 4px 32px rgba(0,0,0,.12);
-    --shadow-sm:   0 2px 12px rgba(0,0,0,.08);
-  }
-
-  /* ── RESET ──────────────────────────────────────────────────────── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: 15px;
-    line-height: 1.6;
-    transition: background .3s, color .3s;
-    overflow-x: hidden;
-  }
-  a { text-decoration: none; color: inherit; }
-  button { cursor: pointer; border: none; background: none; font-family: inherit; }
-  select, input { font-family: inherit; }
-  ul { list-style: none; }
-
-  /* ── NAVBAR ─────────────────────────────────────────────────────── */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 clamp(20px, 5vw, 60px);
-    height: 64px;
-    background: color-mix(in srgb, var(--bg) 85%, transparent);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border);
-    transition: background .3s, border-color .3s;
-  }
-  .nav-logo {
-    display: flex; align-items: center; gap: 10px;
-    font-family: var(--font-display); font-size: 1.35rem; font-weight: 700;
-    color: var(--text);
-    letter-spacing: -.5px;
-  }
-  .nav-logo .logo-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--accent);
-    flex-shrink: 0;
-  }
-  .nav-links {
-    display: flex; gap: 32px; align-items: center;
-  }
-  .nav-links a {
-    font-size: .85rem; font-weight: 500; color: var(--text2);
-    transition: color .2s;
-    letter-spacing: .3px;
-  }
-  .nav-links a:hover { color: var(--text); }
-  .nav-right { display: flex; align-items: center; gap: 14px; }
-  .nav-cta {
-    padding: 8px 18px; border-radius: 100px;
-    background: var(--accent); color: #111;
-    font-size: .82rem; font-weight: 600;
-    transition: opacity .2s, transform .15s;
-    letter-spacing: .3px;
-  }
-  .nav-cta:hover { opacity: .85; transform: translateY(-1px); }
-  .theme-btn {
-    width: 38px; height: 38px; border-radius: 50%;
-    border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    background: var(--card);
-    font-size: 1rem;
-    transition: border-color .2s, background .2s, transform .15s;
-    color: var(--text2);
-  }
-  .theme-btn:hover { border-color: var(--accent); transform: rotate(15deg); }
-
-  /* ── HERO ───────────────────────────────────────────────────────── */
-  #hero {
-    min-height: 100vh;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center;
-    padding: 100px clamp(20px, 6vw, 80px) 60px;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero-bg {
-    position: absolute; inset: 0; pointer-events: none;
-    background:
-      radial-gradient(ellipse 80% 50% at 50% 0%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 70%),
-      radial-gradient(ellipse 50% 40% at 20% 80%, color-mix(in srgb, var(--green) 6%, transparent) 0%, transparent 60%);
-  }
-  .hero-badge {
-    display: inline-flex; align-items: center; gap: 7px;
-    border: 1px solid var(--border2);
-    background: var(--card);
-    padding: 6px 14px; border-radius: 100px;
-    font-size: .78rem; font-weight: 500; color: var(--text2);
-    margin-bottom: 28px;
-    animation: fadeSlideUp .6s ease both;
-    letter-spacing: .5px;
-  }
-  .hero-badge span { color: var(--accent); }
-  .hero-title {
-    font-family: var(--font-display);
-    font-size: clamp(2.6rem, 7vw, 5.5rem);
-    font-weight: 800;
-    line-height: 1.08;
-    letter-spacing: -2px;
-    color: var(--text);
-    margin-bottom: 22px;
-    animation: fadeSlideUp .65s .1s ease both;
-  }
-  .hero-title em {
-    font-style: italic;
-    color: var(--accent);
-  }
-  .hero-sub {
-    font-size: clamp(1rem, 2vw, 1.15rem);
-    color: var(--text2);
-    max-width: 540px;
-    line-height: 1.7;
-    margin-bottom: 36px;
-    animation: fadeSlideUp .65s .18s ease both;
-    font-weight: 300;
-  }
-  .hero-btns {
-    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
-    margin-bottom: 56px;
-    animation: fadeSlideUp .65s .26s ease both;
-  }
-  .btn-primary {
-    padding: 13px 28px; border-radius: 100px;
-    background: var(--accent); color: #111;
-    font-size: .9rem; font-weight: 600;
-    transition: opacity .2s, transform .15s;
-    letter-spacing: .2px;
-  }
-  .btn-primary:hover { opacity: .85; transform: translateY(-2px); }
-  .btn-ghost {
-    padding: 13px 28px; border-radius: 100px;
-    border: 1px solid var(--border2);
-    background: transparent; color: var(--text);
-    font-size: .9rem; font-weight: 500;
-    transition: border-color .2s, background .2s, transform .15s;
-  }
-  .btn-ghost:hover { border-color: var(--accent); background: var(--accent-dim); transform: translateY(-2px); }
-
-  .hero-stats {
-    display: flex; gap: clamp(28px, 5vw, 60px); flex-wrap: wrap; justify-content: center;
-    animation: fadeSlideUp .65s .34s ease both;
-  }
-  .stat-item { text-align: center; }
-  .stat-num {
-    font-family: var(--font-display);
-    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-    font-weight: 700; color: var(--text);
-    line-height: 1.1;
-  }
-  .stat-num span { color: var(--accent); }
-  .stat-label { font-size: .78rem; color: var(--text3); letter-spacing: .5px; margin-top: 2px; font-weight: 500; }
-  .scroll-hint {
-    margin-top: 56px;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    color: var(--text3); font-size: .75rem; letter-spacing: 1px;
-    animation: fadeSlideUp .65s .42s ease both;
-  }
-  .scroll-arrow {
-    width: 28px; height: 28px; border-radius: 50%;
-    border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: .75rem;
-    animation: bounce 2s ease-in-out infinite;
-  }
-
-  /* ── FEATURES ───────────────────────────────────────────────────── */
-  #features {
-    padding: clamp(60px, 10vw, 110px) clamp(20px, 6vw, 80px);
-    max-width: 1200px; margin: 0 auto;
-  }
-  .section-eyebrow {
-    font-size: .75rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 14px;
-  }
-  .section-title {
-    font-family: var(--font-display);
-    font-size: clamp(1.9rem, 4vw, 3rem);
-    font-weight: 700; line-height: 1.15;
-    letter-spacing: -1px; color: var(--text);
-    margin-bottom: 14px;
-  }
-  .section-sub {
-    font-size: 1rem; color: var(--text2); max-width: 480px; line-height: 1.7;
-    margin-bottom: 56px; font-weight: 300;
-  }
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-    gap: 20px;
-  }
-  .feature-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px 24px;
-    transition: border-color .25s, transform .25s, box-shadow .25s, background .3s;
-  }
-  .feature-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-sm);
-    background: var(--card2);
-  }
-  .feat-icon {
-    width: 44px; height: 44px; border-radius: var(--radius-sm);
-    background: var(--accent-dim);
-    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem; margin-bottom: 18px;
-  }
-  .feat-title { font-weight: 600; margin-bottom: 8px; font-size: .95rem; color: var(--text); }
-  .feat-desc  { font-size: .85rem; color: var(--text2); line-height: 1.6; font-weight: 300; }
-
-  /* ── PREDICTOR APP ──────────────────────────────────────────────── */
-  #predictor {
-    padding: clamp(60px, 10vw, 100px) clamp(20px, 5vw, 60px);
-    background: var(--bg2);
-    transition: background .3s;
-  }
-  #predictor .inner {
-    max-width: 1100px; margin: 0 auto;
-  }
-  .app-layout {
-    display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: 24px;
-    align-items: start;
-    margin-top: 48px;
-  }
-  @media (max-width: 860px) {
-    .app-layout { grid-template-columns: 1fr; }
-  }
-
-  /* sidebar */
-  .sidebar {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    transition: background .3s, border-color .3s;
-  }
-  .sidebar-header {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 22px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  .sidebar-title {
-    font-family: var(--font-display);
-    font-weight: 700; font-size: 1.05rem; color: var(--text);
-  }
-  .sidebar-icon { font-size: 1.1rem; }
-  .form-group { margin-bottom: 18px; }
-  .form-label {
-    display: block; font-size: .75rem; font-weight: 600;
-    letter-spacing: .5px; text-transform: uppercase;
-    color: var(--text3); margin-bottom: 7px;
-  }
-  .form-select, .form-input {
-    width: 100%; padding: 10px 14px;
-    background: var(--bg3); color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-size: .88rem; font-weight: 400;
-    transition: border-color .2s, background .3s;
-    appearance: none;
-  }
-  .form-select:focus, .form-input:focus {
-    outline: none; border-color: var(--accent);
-  }
-  .select-wrap { position: relative; }
-  .select-wrap::after {
-    content: '▾'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-    color: var(--text3); pointer-events: none; font-size: .8rem;
-  }
-  .checkbox-group {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-  }
-  .checkbox-item {
-    display: flex; align-items: center; gap: 8px;
-    background: var(--bg3); border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 8px 10px; cursor: pointer;
-    transition: border-color .2s, background .2s;
-    font-size: .8rem; color: var(--text2); font-weight: 500;
-    user-select: none;
-  }
-  .checkbox-item:hover { border-color: var(--accent); color: var(--text); }
-  .checkbox-item.checked {
-    border-color: var(--accent);
-    background: var(--accent-dim);
-    color: var(--text);
-  }
-  .checkbox-item .cb-dot {
-    width: 14px; height: 14px; border-radius: 4px;
-    border: 1.5px solid var(--border2);
-    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-    font-size: .6rem; color: var(--accent);
-    transition: background .2s, border-color .2s;
-  }
-  .checkbox-item.checked .cb-dot {
-    background: var(--accent); border-color: var(--accent); color: #111;
-  }
-  .predict-btn {
-    width: 100%; padding: 13px;
-    background: var(--accent); color: #111;
-    font-size: .9rem; font-weight: 700;
-    border-radius: var(--radius-sm);
-    letter-spacing: .3px;
-    transition: opacity .2s, transform .15s;
-    margin-top: 4px;
-  }
-  .predict-btn:hover { opacity: .85; transform: translateY(-1px); }
-  .predict-btn:active { transform: translateY(0); }
-
-  /* main panel */
-  .main-panel { display: flex; flex-direction: column; gap: 20px; }
-
-  /* result card */
-  .result-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px 28px;
-    transition: background .3s, border-color .3s;
-    position: relative; overflow: hidden;
-  }
-  .result-card .bg-glow {
-    position: absolute; top: -40px; right: -40px;
-    width: 180px; height: 180px; border-radius: 50%;
-    background: radial-gradient(ellipse, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%);
-    pointer-events: none;
-  }
-  .result-label {
-    font-size: .72rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
-    color: var(--text3); margin-bottom: 10px;
-  }
-  .price-display {
-    font-family: var(--font-display);
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    font-weight: 800; color: var(--text);
-    line-height: 1;
-    margin-bottom: 6px;
-    transition: all .4s;
-  }
-  .price-display span { color: var(--accent); }
-  .price-range {
-    font-size: .82rem; color: var(--text2); margin-bottom: 20px;
-  }
-  .confidence-row {
-    display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
-  }
-  .confidence-label { font-size: .78rem; color: var(--text3); font-weight: 500; }
-  .confidence-bar-wrap {
-    flex: 1; height: 5px; background: var(--bg3); border-radius: 100px; overflow: hidden;
-  }
-  .confidence-bar {
-    height: 100%; border-radius: 100px;
-    background: linear-gradient(90deg, var(--green), var(--accent));
-    transition: width .8s cubic-bezier(.22,1,.36,1);
-    width: 0%;
-  }
-  .confidence-pct { font-size: .78rem; font-weight: 600; color: var(--green); }
-  .result-tags {
-    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px;
-  }
-  .result-tag {
-    padding: 5px 12px; border-radius: 100px;
-    background: var(--bg3); border: 1px solid var(--border);
-    font-size: .75rem; color: var(--text2); font-weight: 500;
-  }
-
-  /* factors breakdown */
-  .factors-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px 28px;
-    transition: background .3s, border-color .3s;
-  }
-  .factors-title {
-    font-weight: 600; font-size: .9rem; color: var(--text);
-    margin-bottom: 18px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .factors-title::after {
-    content: ''; flex: 1; height: 1px; background: var(--border);
-  }
-  .factor-row {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 13px;
-  }
-  .factor-row:last-child { margin-bottom: 0; }
-  .factor-name { font-size: .82rem; color: var(--text2); width: 120px; flex-shrink: 0; }
-  .factor-bar-wrap {
-    flex: 1; height: 6px; background: var(--bg3); border-radius: 100px; overflow: hidden;
-  }
-  .factor-bar {
-    height: 100%; border-radius: 100px; transition: width .9s cubic-bezier(.22,1,.36,1);
-    width: 0%;
-  }
-  .factor-val { font-size: .8rem; font-weight: 600; color: var(--text); width: 48px; text-align: right; }
-
-  /* city insights */
-  .insights-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px 28px;
-    transition: background .3s, border-color .3s;
-  }
-  .insights-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 14px;
-    margin-top: 14px;
-  }
-  .insight-item {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 14px 16px;
-    transition: background .3s;
-  }
-  .insight-key { font-size: .72rem; color: var(--text3); font-weight: 600; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 4px; }
-  .insight-val { font-size: .95rem; font-weight: 600; color: var(--text); }
-  .insight-sub { font-size: .72rem; color: var(--text3); margin-top: 2px; }
-
-  /* placeholder state */
-  .placeholder-state {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 60px 20px; text-align: center;
-    border: 1px dashed var(--border2);
-    border-radius: var(--radius);
-    gap: 12px;
-  }
-  .placeholder-icon { font-size: 2.5rem; opacity: .4; }
-  .placeholder-text { color: var(--text3); font-size: .9rem; }
-  .placeholder-hint { font-size: .78rem; color: var(--text3); opacity: .7; }
-
-  /* ── MARQUEE ─────────────────────────────────────────────────────── */
-  .marquee-wrap {
-    overflow: hidden; padding: 20px 0;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    background: var(--bg2);
-    margin: 0;
-    transition: background .3s, border-color .3s;
-  }
-  .marquee-track {
-    display: flex; gap: 0;
-    animation: marquee 30s linear infinite;
-    width: max-content;
-  }
-  .marquee-item {
-    padding: 0 32px; font-size: .8rem; font-weight: 500;
-    color: var(--text3); white-space: nowrap;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .marquee-item::after { content: '✦'; color: var(--accent); font-size: .6rem; }
-
-  /* ── FOOTER ──────────────────────────────────────────────────────── */
-  footer {
-    padding: 48px clamp(20px, 6vw, 80px);
-    border-top: 1px solid var(--border);
-    transition: border-color .3s;
-  }
-  .footer-inner {
-    max-width: 1100px; margin: 0 auto;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 20px;
-  }
-  .footer-logo {
-    font-family: var(--font-display); font-size: 1.1rem; font-weight: 700;
-    color: var(--text2);
-  }
-  .footer-links { display: flex; gap: 24px; }
-  .footer-links a { font-size: .82rem; color: var(--text3); transition: color .2s; }
-  .footer-links a:hover { color: var(--text); }
-  .footer-copy { font-size: .78rem; color: var(--text3); }
-
-  /* ── ANIMATIONS ─────────────────────────────────────────────────── */
-  @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(5px); }
-  }
-  @keyframes marquee {
-    from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
-  }
-  @keyframes shimmer {
-    from { opacity: .5; }
-    to   { opacity: 1; }
-  }
-  .price-display.animating { animation: shimmer .4s ease; }
-
-  /* ── RANGE INPUT ─────────────────────────────────────────────────── */
-  input[type="range"] {
-    -webkit-appearance: none; appearance: none;
-    width: 100%; height: 4px;
-    background: var(--border2); border-radius: 100px;
-    outline: none; padding: 0; border: none;
-    cursor: pointer;
-  }
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none; appearance: none;
-    width: 18px; height: 18px; border-radius: 50%;
-    background: var(--accent);
-    border: 3px solid var(--bg);
-    box-shadow: 0 0 0 1px var(--accent);
-    cursor: pointer;
-    transition: transform .15s;
-  }
-  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-  .range-labels {
-    display: flex; justify-content: space-between;
-    font-size: .72rem; color: var(--text3); margin-top: 4px;
-  }
-  .range-value {
-    font-size: .88rem; font-weight: 600; color: var(--accent);
-    text-align: right; margin-bottom: 6px;
-  }
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-<!-- ── NAVBAR ──────────────────────────────────────────── -->
+<canvas id="bgCanvas"></canvas>
+
+<!-- ── NAV ──────────────────────────────────────── -->
 <nav>
-  <a href="#hero" class="nav-logo">
-    <span class="logo-dot"></span>
-    GharMol
-  </a>
-  <ul class="nav-links">
+  <a href="#hero" class="nl"><span class="dot"></span>GharMol</a>
+  <ul class="nm">
     <li><a href="#hero">Home</a></li>
     <li><a href="#predictor">Predict</a></li>
     <li><a href="#features">Features</a></li>
   </ul>
-  <div class="nav-right">
-    <button class="theme-btn" id="themeBtn" title="Toggle theme">🌙</button>
-    <a href="#predictor" class="nav-cta">Estimate Price ↗</a>
+  <div class="nr">
+    <button class="tbtn" id="themeBtn" title="Toggle theme">🌙</button>
+    <a href="#predictor" class="ncta">Estimate Price ↗</a>
   </div>
 </nav>
 
-<!-- ── HERO ────────────────────────────────────────────── -->
+<!-- ── HERO ─────────────────────────────────────── -->
 <section id="hero">
-  <div class="hero-bg"></div>
-  <p class="hero-badge">🇮🇳 <span>India's</span>&nbsp;smartest property estimator</p>
-  <h1 class="hero-title">Know Your Home's<br><em>True Worth.</em></h1>
-  <p class="hero-sub">
-    Get instant, data-driven price estimates across 15+ Indian cities.
-    Enter your property details — get a result in seconds.
-  </p>
-  <div class="hero-btns">
-    <a href="#predictor" class="btn-primary">Estimate Price →</a>
-    <a href="#features" class="btn-ghost">See How It Works</a>
+  <div class="hbadge"><span class="pulse"></span>🇮🇳 28 States &amp; 8 UTs · 150+ Cities</div>
+  <h1 class="htitle">
+    Know Your Home's<br>
+    <em>True Worth.</em>
+  </h1>
+  <p class="hsub">India's most comprehensive property price estimator. From Leh to Kanyakumari — every state, every city, every locality.</p>
+  <div class="hbtns">
+    <a href="#predictor" class="bp">Estimate Now →</a>
+    <a href="#features" class="bg-">How It Works</a>
   </div>
-  <div class="hero-stats">
-    <div class="stat-item">
-      <div class="stat-num">15<span>+</span></div>
-      <div class="stat-label">Indian Cities</div>
+  <div class="hstats">
+    <div class="hstat">
+      <div class="hsnum"><span class="counter" data-target="36">0</span><span class="acc">+</span></div>
+      <div class="hslbl">States &amp; UTs</div>
     </div>
-    <div class="stat-item">
-      <div class="stat-num">₹10L<span>–</span>₹50Cr</div>
-      <div class="stat-label">Price Range</div>
+    <div class="hstat">
+      <div class="hsnum"><span class="counter" data-target="150">0</span><span class="acc">+</span></div>
+      <div class="hslbl">Cities Covered</div>
     </div>
-    <div class="stat-item">
-      <div class="stat-num">98<span>%</span></div>
-      <div class="stat-label">Accuracy Target</div>
+    <div class="hstat">
+      <div class="hsnum">₹10L<span class="acc">–</span>₹50Cr</div>
+      <div class="hslbl">Price Range</div>
+    </div>
+    <div class="hstat">
+      <div class="hsnum"><span class="counter" data-target="98">0</span><span class="acc">%</span></div>
+      <div class="hslbl">Accuracy</div>
     </div>
   </div>
-  <div class="scroll-hint">
-    SCROLL
-    <div class="scroll-arrow">↓</div>
-  </div>
+  <div class="scroll-ind">SCROLL<div class="sarr">↓</div></div>
 </section>
 
-<!-- ── MARQUEE ──────────────────────────────────────────── -->
-<div class="marquee-wrap">
-  <div class="marquee-track" id="marqueeTrack"></div>
-</div>
+<!-- ── TICKER ──────────────────────────────────── -->
+<div class="ticker-wrap"><div class="ticker-track" id="tickerTrack"></div></div>
 
-<!-- ── FEATURES ────────────────────────────────────────── -->
+<!-- ── FEATURES ─────────────────────────────────── -->
 <section id="features">
-  <p class="section-eyebrow">Why GharMol</p>
-  <h2 class="section-title">Everything you need to<br>estimate smartly.</h2>
-  <p class="section-sub">Built around India's unique property market — from Lutyens Delhi to SoBo and IT corridors.</p>
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feat-icon">🏙️</div>
-      <div class="feat-title">15+ Indian Cities</div>
-      <div class="feat-desc">Mumbai, Delhi, Bangalore, Hyderabad, Pune, Chennai, and more — each with its own micro-market calibration.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feat-icon">📐</div>
-      <div class="feat-title">BHK + Area Inputs</div>
-      <div class="feat-desc">From compact 1BHK studio to sprawling 5BHK villas — built-up area, floor, and age all factored in.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feat-icon">🏋️</div>
-      <div class="feat-title">Amenity Scoring</div>
-      <div class="feat-desc">Gym, parking, pool, 24×7 security, lift — each amenity adjusts the estimate based on real market data.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feat-icon">📊</div>
-      <div class="feat-title">Factor Breakdown</div>
-      <div class="feat-desc">See exactly which inputs drive your price — location, size, floor premium, amenities — all visualised clearly.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feat-icon">🏘️</div>
-      <div class="feat-title">City Insights</div>
-      <div class="feat-desc">Average price/sqft, market trend, and locality tier for your chosen city — right alongside your estimate.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feat-icon">⚡</div>
-      <div class="feat-title">Instant Results</div>
-      <div class="feat-desc">No sign-up, no waiting. Fill the form and get your estimate with confidence score in milliseconds.</div>
-    </div>
+  <p class="eyebrow reveal">Why GharMol</p>
+  <h2 class="stitle reveal">Built for <em style="color:var(--a);font-style:italic">Bharat.</em></h2>
+  <p class="ssub reveal">Every feature designed around India's unique property market — micro-markets, tier cities, amenity scoring.</p>
+  <div class="fgrid">
+    <div class="fcard reveal"><div class="fnumber">01</div><div class="ficon">🗺️</div><div class="ftitle">All 36 States &amp; UTs</div><div class="fdesc">Every Indian state from Andaman &amp; Nicobar to Uttarakhand, with 150+ cities across all tiers calibrated to real market data.</div></div>
+    <div class="fcard reveal"><div class="fnumber">02</div><div class="ficon">🏙️</div><div class="ftitle">Locality Tiers</div><div class="fdesc">Premium/Central, Mid-Range, and Affordable zones for each city — because SoBo and Thane aren't the same market.</div></div>
+    <div class="fcard reveal"><div class="fnumber">03</div><div class="ficon">📊</div><div class="ftitle">Factor Breakdown</div><div class="fdesc">Animated bars show exactly how location, area, floor, amenities, age and property type each drive your estimate.</div></div>
+    <div class="fcard reveal"><div class="fnumber">04</div><div class="ficon">🎯</div><div class="ftitle">Confidence Gauge</div><div class="fdesc">An animated arc gauge shows model confidence for your specific query — more inputs mean higher accuracy.</div></div>
+    <div class="fcard reveal"><div class="fnumber">05</div><div class="ficon">🏋️</div><div class="ftitle">8 Amenity Types</div><div class="fdesc">Pool, gym, parking, security, lift, clubhouse, garden, power backup — each adjusts price based on city-specific premiums.</div></div>
+    <div class="fcard reveal"><div class="fnumber">06</div><div class="ficon">⚡</div><div class="ftitle">Instant Estimate</div><div class="fdesc">No sign-up, no API call. Pure local computation with animated price count-up. Result in under a second.</div></div>
   </div>
 </section>
 
-<!-- ── PREDICTOR ────────────────────────────────────────── -->
+<!-- ── PREDICTOR ─────────────────────────────── -->
 <section id="predictor">
-  <div class="inner">
-    <p class="section-eyebrow">The Estimator</p>
-    <h2 class="section-title">Your property, priced.</h2>
-    <p class="section-sub">Fill in your details on the left and hit Predict to get your estimate.</p>
+  <div class="pinner">
+    <p class="eyebrow reveal">The Estimator</p>
+    <h2 class="stitle reveal">Your property, <em style="color:var(--a);font-style:italic">priced.</em></h2>
+    <p class="ssub reveal">Select your state, pick a city, fill in the details — get your estimate with a full breakdown.</p>
 
-    <div class="app-layout">
-
-      <!-- SIDEBAR FORM -->
+    <div class="alayout">
+      <!-- FORM -->
       <aside class="sidebar">
-        <div class="sidebar-header">
-          <span class="sidebar-icon">🏠</span>
-          <span class="sidebar-title">Property Details</span>
-        </div>
+        <div class="sbhdr"><span class="sbicon">🏠</span><span class="sbtitle">Property Details</span></div>
 
-        <!-- City -->
-        <div class="form-group">
-          <label class="form-label">City</label>
-          <div class="select-wrap">
-            <select class="form-select" id="city">
-              <option value="mumbai">Mumbai</option>
-              <option value="delhi">Delhi / NCR</option>
-              <option value="bangalore" selected>Bangalore</option>
-              <option value="hyderabad">Hyderabad</option>
-              <option value="pune">Pune</option>
-              <option value="chennai">Chennai</option>
-              <option value="kolkata">Kolkata</option>
-              <option value="ahmedabad">Ahmedabad</option>
-              <option value="jaipur">Jaipur</option>
-              <option value="lucknow">Lucknow</option>
-              <option value="chandigarh">Chandigarh</option>
-              <option value="kochi">Kochi</option>
-              <option value="indore">Indore</option>
-              <option value="nagpur">Nagpur</option>
-              <option value="surat">Surat</option>
-            </select>
-          </div>
+        <div class="fg">
+          <label class="fl">State</label>
+          <div class="sw"><select class="fsel" id="stateSelect"></select></div>
         </div>
-
-        <!-- Locality Tier -->
-        <div class="form-group">
-          <label class="form-label">Locality Tier</label>
-          <div class="select-wrap">
-            <select class="form-select" id="tier">
+        <div class="fg">
+          <label class="fl">City</label>
+          <div class="sw"><select class="fsel" id="citySelect"></select></div>
+        </div>
+        <div class="fg">
+          <label class="fl">Locality Tier</label>
+          <div class="sw">
+            <select class="fsel" id="tier">
               <option value="premium">Premium / Central</option>
               <option value="mid" selected>Mid-Range</option>
               <option value="affordable">Affordable / Suburbs</option>
             </select>
           </div>
         </div>
-
-        <!-- BHK -->
-        <div class="form-group">
-          <label class="form-label">BHK Type</label>
-          <div class="select-wrap">
-            <select class="form-select" id="bhk">
+        <div class="fg">
+          <label class="fl">BHK Type</label>
+          <div class="sw">
+            <select class="fsel" id="bhk">
               <option value="1">1 BHK</option>
               <option value="2" selected>2 BHK</option>
               <option value="3">3 BHK</option>
@@ -743,34 +120,28 @@
             </select>
           </div>
         </div>
-
-        <!-- Property Type -->
-        <div class="form-group">
-          <label class="form-label">Property Type</label>
-          <div class="select-wrap">
-            <select class="form-select" id="propType">
+        <div class="fg">
+          <label class="fl">Property Type</label>
+          <div class="sw">
+            <select class="fsel" id="propType">
               <option value="flat" selected>Apartment / Flat</option>
               <option value="independent">Independent House</option>
               <option value="villa">Villa / Bungalow</option>
-              <option value="plot">Plot / Land</option>
               <option value="studio">Studio</option>
+              <option value="plot">Plot / Land</option>
             </select>
           </div>
         </div>
-
-        <!-- Area -->
-        <div class="form-group">
-          <label class="form-label">Built-up Area (sq ft)</label>
-          <div class="range-value" id="areaVal">1200 sq ft</div>
-          <input type="range" id="area" min="300" max="8000" value="1200" step="50" />
-          <div class="range-labels"><span>300</span><span>8000</span></div>
+        <div class="fg">
+          <label class="fl">Built-up Area (sq ft)</label>
+          <div class="rval" id="areaVal">1,200 sq ft</div>
+          <input type="range" id="area" min="300" max="8000" value="1200" step="50"/>
+          <div class="rlbls"><span>300</span><span>8,000</span></div>
         </div>
-
-        <!-- Floor -->
-        <div class="form-group">
-          <label class="form-label">Floor</label>
-          <div class="select-wrap">
-            <select class="form-select" id="floor">
+        <div class="fg">
+          <label class="fl">Floor</label>
+          <div class="sw">
+            <select class="fsel" id="floor">
               <option value="ground">Ground Floor</option>
               <option value="low">Low (1–5)</option>
               <option value="mid" selected>Mid (6–15)</option>
@@ -779,278 +150,50 @@
             </select>
           </div>
         </div>
-
-        <!-- Age -->
-        <div class="form-group">
-          <label class="form-label">Property Age</label>
-          <div class="range-value" id="ageVal">5 years</div>
-          <input type="range" id="age" min="0" max="40" value="5" step="1" />
-          <div class="range-labels"><span>New</span><span>40 yr</span></div>
+        <div class="fg">
+          <label class="fl">Property Age (years)</label>
+          <div class="rval" id="ageVal">5 years</div>
+          <input type="range" id="age" min="0" max="40" value="5" step="1"/>
+          <div class="rlbls"><span>New</span><span>40 yr</span></div>
         </div>
-
-        <!-- Amenities -->
-        <div class="form-group">
-          <label class="form-label">Amenities</label>
-          <div class="checkbox-group" id="amenities">
-            <div class="checkbox-item checked" data-val="parking">
-              <div class="cb-dot">✓</div> Parking
-            </div>
-            <div class="checkbox-item checked" data-val="security">
-              <div class="cb-dot">✓</div> Security
-            </div>
-            <div class="checkbox-item" data-val="gym">
-              <div class="cb-dot"></div> Gym
-            </div>
-            <div class="checkbox-item" data-val="pool">
-              <div class="cb-dot"></div> Pool
-            </div>
-            <div class="checkbox-item checked" data-val="lift">
-              <div class="cb-dot">✓</div> Lift
-            </div>
-            <div class="checkbox-item" data-val="clubhouse">
-              <div class="cb-dot"></div> Clubhouse
-            </div>
-            <div class="checkbox-item" data-val="garden">
-              <div class="cb-dot"></div> Garden
-            </div>
-            <div class="checkbox-item" data-val="powerbackup">
-              <div class="cb-dot"></div> Power Backup
-            </div>
+        <div class="fg">
+          <label class="fl">Amenities</label>
+          <div class="cbg" id="amenities">
+            <div class="cbi on" data-v="parking"><div class="cdot">✓</div>Parking</div>
+            <div class="cbi on" data-v="security"><div class="cdot">✓</div>Security</div>
+            <div class="cbi" data-v="gym"><div class="cdot"></div>Gym</div>
+            <div class="cbi" data-v="pool"><div class="cdot"></div>Pool</div>
+            <div class="cbi on" data-v="lift"><div class="cdot">✓</div>Lift</div>
+            <div class="cbi" data-v="clubhouse"><div class="cdot"></div>Clubhouse</div>
+            <div class="cbi" data-v="garden"><div class="cdot"></div>Garden</div>
+            <div class="cbi" data-v="powerbackup"><div class="cdot"></div>Power Backup</div>
           </div>
         </div>
-
-        <button class="predict-btn" id="predictBtn">✦ Predict Price</button>
+        <button class="pbtn" id="predictBtn">✦ Predict Price</button>
       </aside>
 
-      <!-- MAIN PANEL -->
-      <div class="main-panel" id="mainPanel">
-        <div class="placeholder-state" id="placeholder">
-          <div class="placeholder-icon">🏡</div>
-          <div class="placeholder-text">Enter your property details</div>
-          <div class="placeholder-hint">Fill the form and click Predict Price to see your estimate</div>
+      <!-- RESULT PANEL -->
+      <div class="mpanel" id="mpanel">
+        <div class="pstate">
+          <div class="pi">🏡</div>
+          <div class="pt">Select your state &amp; city, fill in details</div>
+          <div class="ph">Hit Predict Price to get your personalised estimate</div>
         </div>
       </div>
-
     </div>
   </div>
 </section>
 
-<!-- ── FOOTER ────────────────────────────────────────────── -->
 <footer>
-  <div class="footer-inner">
-    <div class="footer-logo">✦ GharMol</div>
-    <div class="footer-links">
-      <a href="#hero">Home</a>
-      <a href="#features">Features</a>
-      <a href="#predictor">Predictor</a>
+  <div class="fi">
+    <div class="flogo">✦ GharMol</div>
+    <div class="flinks">
+      <a href="#hero">Home</a><a href="#features">Features</a><a href="#predictor">Predictor</a>
     </div>
-    <div class="footer-copy">Built with ♥ for Indian home buyers — Jasjeet Singh</div>
+    <div class="fcopy">Built with ♥ for Indian home buyers — Jasjeet Singh</div>
   </div>
 </footer>
 
-<script>
-/* ── THEME TOGGLE ──────────────────────────────────────── */
-const themeBtn = document.getElementById('themeBtn');
-let isDark = true;
-themeBtn.addEventListener('click', () => {
-  isDark = !isDark;
-  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-  themeBtn.textContent = isDark ? '🌙' : '☀️';
-});
-
-/* ── MARQUEE ───────────────────────────────────────────── */
-const cities = ['Mumbai','Delhi NCR','Bangalore','Hyderabad','Pune','Chennai','Kolkata','Ahmedabad','Jaipur','Kochi','Chandigarh','Indore','Lucknow','Nagpur','Surat'];
-const track = document.getElementById('marqueeTrack');
-const items = [...cities,...cities,...cities].map(c => {
-  const el = document.createElement('div');
-  el.className = 'marquee-item';
-  el.textContent = c;
-  return el;
-});
-items.forEach(i => track.appendChild(i));
-
-/* ── RANGE INPUTS ──────────────────────────────────────── */
-const areaSlider = document.getElementById('area');
-const ageSlider  = document.getElementById('age');
-const areaVal    = document.getElementById('areaVal');
-const ageVal     = document.getElementById('ageVal');
-areaSlider.addEventListener('input', () => { areaVal.textContent = `${areaSlider.value} sq ft`; });
-ageSlider.addEventListener('input',  () => { ageVal.textContent  = `${ageSlider.value} year${ageSlider.value==1?'':'s'}`; });
-
-/* ── CHECKBOXES ────────────────────────────────────────── */
-document.querySelectorAll('.checkbox-item').forEach(item => {
-  item.addEventListener('click', () => {
-    item.classList.toggle('checked');
-    const dot = item.querySelector('.cb-dot');
-    dot.textContent = item.classList.contains('checked') ? '✓' : '';
-  });
-});
-
-/* ── CITY DATA ─────────────────────────────────────────── */
-const cityData = {
-  mumbai:     { name:'Mumbai',     baseRateP: 22000, baseRateM: 14000, baseRateA: 8500,  trend:'+8.2%', tier:'Tier 1 Metro' },
-  delhi:      { name:'Delhi/NCR',  baseRateP: 16000, baseRateM: 9500,  baseRateA: 6000,  trend:'+6.5%', tier:'Tier 1 Metro' },
-  bangalore:  { name:'Bangalore',  baseRateP: 14000, baseRateM: 8500,  baseRateA: 5500,  trend:'+9.1%', tier:'Tier 1 Metro' },
-  hyderabad:  { name:'Hyderabad',  baseRateP: 12000, baseRateM: 7000,  baseRateA: 4500,  trend:'+11.3%',tier:'Tier 1 Metro' },
-  pune:       { name:'Pune',       baseRateP: 11000, baseRateM: 6500,  baseRateA: 4000,  trend:'+7.4%', tier:'Tier 1 Metro' },
-  chennai:    { name:'Chennai',    baseRateP: 10000, baseRateM: 6000,  baseRateA: 3800,  trend:'+5.8%', tier:'Tier 1 Metro' },
-  kolkata:    { name:'Kolkata',    baseRateP: 8500,  baseRateM: 5000,  baseRateA: 3200,  trend:'+4.2%', tier:'Tier 1 Metro' },
-  ahmedabad:  { name:'Ahmedabad',  baseRateP: 7500,  baseRateM: 4500,  baseRateA: 2800,  trend:'+6.0%', tier:'Tier 2 City'  },
-  jaipur:     { name:'Jaipur',     baseRateP: 6500,  baseRateM: 4000,  baseRateA: 2500,  trend:'+5.1%', tier:'Tier 2 City'  },
-  lucknow:    { name:'Lucknow',    baseRateP: 5500,  baseRateM: 3500,  baseRateA: 2200,  trend:'+4.5%', tier:'Tier 2 City'  },
-  chandigarh: { name:'Chandigarh', baseRateP: 8000,  baseRateM: 5200,  baseRateA: 3400,  trend:'+5.5%', tier:'Tier 2 City'  },
-  kochi:      { name:'Kochi',      baseRateP: 9000,  baseRateM: 5800,  baseRateA: 3600,  trend:'+6.8%', tier:'Tier 2 City'  },
-  indore:     { name:'Indore',     baseRateP: 5800,  baseRateM: 3800,  baseRateA: 2400,  trend:'+5.9%', tier:'Tier 2 City'  },
-  nagpur:     { name:'Nagpur',     baseRateP: 5200,  baseRateM: 3400,  baseRateA: 2100,  trend:'+4.0%', tier:'Tier 2 City'  },
-  surat:      { name:'Surat',      baseRateP: 5600,  baseRateM: 3600,  baseRateA: 2300,  trend:'+5.3%', tier:'Tier 2 City'  },
-};
-
-const floorMult  = { ground:0.92, low:0.97, mid:1.0, high:1.06, penthouse:1.18 };
-const propMult   = { flat:1.0, independent:1.08, villa:1.22, plot:0.65, studio:0.88 };
-const ageFactor  = (a) => Math.max(0.70, 1 - (a * 0.008));
-const amenityVal = { parking:1.03, security:1.02, gym:1.035, pool:1.05, lift:1.02, clubhouse:1.03, garden:1.02, powerbackup:1.02 };
-const bhkBonus   = { '1':0.96, '2':1.0, '3':1.04, '4':1.07, '5':1.12 };
-
-/* ── PRICE FORMAT ──────────────────────────────────────── */
-function formatPrice(p) {
-  if (p >= 1e7) return `₹${(p/1e7).toFixed(2)} Cr`;
-  if (p >= 1e5) return `₹${(p/1e5).toFixed(2)} L`;
-  return `₹${p.toLocaleString('en-IN')}`;
-}
-
-/* ── FACTOR COLOR ──────────────────────────────────────── */
-const factorColors = ['#c8a96e','#6abf8a','#7ba7e0','#d4826a','#a88eca','#5dbfbe'];
-
-/* ── PREDICT ───────────────────────────────────────────── */
-document.getElementById('predictBtn').addEventListener('click', predict);
-
-function predict() {
-  const city    = document.getElementById('city').value;
-  const tier    = document.getElementById('tier').value;
-  const bhk     = document.getElementById('bhk').value;
-  const type    = document.getElementById('propType').value;
-  const area    = parseInt(areaSlider.value);
-  const floor   = document.getElementById('floor').value;
-  const age     = parseInt(ageSlider.value);
-
-  const checked = [...document.querySelectorAll('.checkbox-item.checked')].map(el => el.dataset.val);
-
-  const cd = cityData[city];
-  const baseRate = tier === 'premium' ? cd.baseRateP : tier === 'mid' ? cd.baseRateM : cd.baseRateA;
-
-  let price = baseRate * area;
-  price *= floorMult[floor];
-  price *= propMult[type];
-  price *= ageFactor(age);
-  price *= (bhkBonus[bhk] || 1);
-
-  let amenityMultiplier = 1;
-  checked.forEach(a => { amenityMultiplier *= (amenityVal[a] || 1); });
-  price *= amenityMultiplier;
-
-  const confidence = Math.min(96, 78 + (checked.length * 2) + (tier==='premium'?3:0));
-  const low  = price * 0.92;
-  const high = price * 1.10;
-
-  // Factor contributions (normalised for bar)
-  const factors = [
-    { name:'Location',  val: Math.round((baseRate/22000)*100), color: factorColors[0] },
-    { name:'Area',      val: Math.round((area/8000)*100),      color: factorColors[1] },
-    { name:'Floor',     val: Math.round(floorMult[floor]*85),  color: factorColors[2] },
-    { name:'Amenities', val: Math.round(((amenityMultiplier-1)*600)+30), color: factorColors[3] },
-    { name:'Age',       val: Math.round(ageFactor(age)*100),   color: factorColors[4] },
-    { name:'Type',      val: Math.round(propMult[type]*80),    color: factorColors[5] },
-  ];
-
-  renderResult({ price, low, high, confidence, factors, cd, tier, city, area, checked });
-}
-
-function renderResult({ price, low, high, confidence, factors, cd, tier, area, checked }) {
-  const panel = document.getElementById('mainPanel');
-  panel.innerHTML = `
-    <!-- Price Card -->
-    <div class="result-card">
-      <div class="bg-glow"></div>
-      <div class="result-label">ESTIMATED MARKET VALUE</div>
-      <div class="price-display animating" id="priceDisplay">${formatPrice(price)}</div>
-      <div class="price-range">Range: ${formatPrice(low)} – ${formatPrice(high)}</div>
-      <div class="confidence-row">
-        <span class="confidence-label">Model Confidence</span>
-        <div class="confidence-bar-wrap">
-          <div class="confidence-bar" id="confBar"></div>
-        </div>
-        <span class="confidence-pct">${confidence}%</span>
-      </div>
-      <div class="result-tags">
-        <span class="result-tag">📍 ${cd.name}</span>
-        <span class="result-tag">📐 ${area} sq ft</span>
-        <span class="result-tag">🏷️ ${tier === 'premium' ? 'Premium' : tier === 'mid' ? 'Mid-Range' : 'Affordable'} locality</span>
-        ${checked.map(a => `<span class="result-tag">✓ ${a.charAt(0).toUpperCase()+a.slice(1)}</span>`).join('')}
-      </div>
-    </div>
-
-    <!-- Factors -->
-    <div class="factors-card">
-      <div class="factors-title">Price Factor Breakdown</div>
-      ${factors.map(f => `
-        <div class="factor-row">
-          <div class="factor-name">${f.name}</div>
-          <div class="factor-bar-wrap">
-            <div class="factor-bar" data-w="${Math.min(f.val,100)}" style="background:${f.color}"></div>
-          </div>
-          <div class="factor-val">${Math.min(f.val,100)}%</div>
-        </div>
-      `).join('')}
-    </div>
-
-    <!-- City Insights -->
-    <div class="insights-card">
-      <div class="factors-title">City Insights — ${cd.name}</div>
-      <div class="insights-grid">
-        <div class="insight-item">
-          <div class="insight-key">Avg Rate</div>
-          <div class="insight-val">₹${(cd.baseRateM).toLocaleString('en-IN')}/sqft</div>
-          <div class="insight-sub">Mid-range avg</div>
-        </div>
-        <div class="insight-item">
-          <div class="insight-key">Premium Rate</div>
-          <div class="insight-val">₹${(cd.baseRateP).toLocaleString('en-IN')}/sqft</div>
-          <div class="insight-sub">Central area</div>
-        </div>
-        <div class="insight-item">
-          <div class="insight-key">Market Trend</div>
-          <div class="insight-val" style="color:var(--green)">${cd.trend}</div>
-          <div class="insight-sub">YoY growth</div>
-        </div>
-        <div class="insight-item">
-          <div class="insight-key">City Tier</div>
-          <div class="insight-val">${cd.tier}</div>
-          <div class="insight-sub">Classification</div>
-        </div>
-        <div class="insight-item">
-          <div class="insight-key">Your Rate</div>
-          <div class="insight-val">₹${Math.round(price/parseInt(document.getElementById('area').value)).toLocaleString('en-IN')}/sqft</div>
-          <div class="insight-sub">This estimate</div>
-        </div>
-        <div class="insight-item">
-          <div class="insight-key">Stamp Duty</div>
-          <div class="insight-val">${price >= 4500000 ? '6%' : '5%'}</div>
-          <div class="insight-sub">Approx (varies)</div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  // Animate bars after render
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      document.getElementById('confBar').style.width = confidence + '%';
-      document.querySelectorAll('.factor-bar[data-w]').forEach(bar => {
-        bar.style.width = bar.dataset.w + '%';
-      });
-    }, 60);
-  });
-}
-</script>
+<script src="script.js" defer></script>
 </body>
 </html>
