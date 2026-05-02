@@ -67,8 +67,11 @@ nav{
   border-bottom:1px solid var(--border);
   transition:background .35s,border-color .35s;
 }
-.nl{display:flex;align-items:center;gap:10px;font-family:var(--font-d);font-size:1.3rem;font-weight:800;letter-spacing:-1px}
-.nl .dot{width:9px;height:9px;border-radius:50%;background:var(--a);box-shadow:0 0 10px var(--a)}
+.nl{display:flex;align-items:center;gap:10px;font-family:var(--font-d);font-size:1.3rem;font-weight:800;letter-spacing:-1px;transition:opacity .2s}
+.nl:hover{opacity:.85}
+.logo-mark{border-radius:9px;box-shadow:0 0 18px rgba(240,180,41,.35);transition:box-shadow .3s,transform .3s;flex-shrink:0}
+.nl:hover .logo-mark{box-shadow:0 0 28px rgba(240,180,41,.6);transform:rotate(-4deg) scale(1.05)}
+.logo-text{background:linear-gradient(135deg,var(--text) 40%,var(--a));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .nm{display:flex;gap:28px}
 .nm a{font-size:.83rem;font-weight:500;color:var(--text2);transition:color .2s;letter-spacing:.3px}
 .nm a:hover{color:var(--text)}
@@ -100,16 +103,13 @@ nav{
 }
 .hbadge{
   display:inline-flex;align-items:center;gap:8px;
-  border:1px solid var(--border2);background:var(--card);
-  padding:7px 16px;border-radius:99px;
-  font-size:.78rem;font-weight:600;color:var(--text2);
-  margin-bottom:28px;letter-spacing:.5px;
+  border:1px solid color-mix(in srgb,var(--a) 28%,transparent);
+  background:color-mix(in srgb,var(--a) 6%,var(--card));
+  padding:8px 20px;border-radius:99px;
+  font-size:.8rem;font-weight:600;color:var(--text2);
+  margin-bottom:32px;letter-spacing:.6px;
   animation:fsu .7s ease both;
-}
-.hbadge .pulse{
-  width:7px;height:7px;border-radius:50%;background:var(--green);
-  box-shadow:0 0 8px var(--green);
-  animation:pulsate 2s ease infinite;
+  box-shadow:0 0 28px color-mix(in srgb,var(--a) 10%,transparent),inset 0 1px 0 color-mix(in srgb,var(--a) 15%,transparent);
 }
 .htitle{
   font-family:var(--font-d);
@@ -118,10 +118,11 @@ nav{
   letter-spacing:-3px;color:var(--text);
   margin-bottom:20px;
   animation:fsu .7s .1s ease both;
+  text-shadow:0 2px 40px color-mix(in srgb,var(--a) 12%,transparent);
 }
-.htitle em{font-style:italic;color:var(--a)}
-.htitle .stroke{
-  -webkit-text-stroke:2px var(--a);color:transparent;
+.htitle em{
+  font-style:italic;color:var(--a);
+  text-shadow:0 0 60px color-mix(in srgb,var(--a) 40%,transparent),0 2px 20px color-mix(in srgb,var(--a) 25%,transparent);
 }
 .hsub{
   font-size:clamp(.95rem,2vw,1.15rem);color:var(--text2);
@@ -160,14 +161,16 @@ nav{
 .hslbl{font-size:.76rem;color:var(--text3);letter-spacing:.8px;margin-top:4px;font-weight:600;text-transform:uppercase}
 .scroll-ind{
   position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:8px;
-  color:var(--text3);font-size:.7rem;letter-spacing:2px;text-transform:uppercase;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  color:var(--text3);font-size:.68rem;letter-spacing:3px;text-transform:uppercase;
   animation:fsu .7s .5s ease both;
 }
 .sarr{
-  width:32px;height:32px;border-radius:50%;border:1px solid var(--border2);
-  display:flex;align-items:center;justify-content:center;font-size:.8rem;
-  animation:bob 2.2s ease infinite;color:var(--text3);
+  width:36px;height:36px;border-radius:50%;
+  border:1px solid color-mix(in srgb,var(--a) 35%,var(--border2));
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;
+  animation:bob 3.8s ease-in-out infinite;color:var(--a);
+  box-shadow:0 0 16px color-mix(in srgb,var(--a) 15%,transparent);
 }
 
 /* ── TICKER ──────────────────────────── */
@@ -181,7 +184,7 @@ nav{
 }
 .ticker-wrap::before{left:0;background:linear-gradient(90deg,var(--card),transparent)}
 .ticker-wrap::after{right:0;background:linear-gradient(270deg,var(--card),transparent)}
-.ticker-track{display:flex;width:max-content;animation:tick 40s linear infinite}
+.ticker-track{display:flex;width:max-content;animation:tick 65s linear infinite}
 .ticker-item{
   padding:0 28px;font-size:.82rem;font-weight:500;color:var(--text2);
   white-space:nowrap;display:flex;align-items:center;gap:10px;
@@ -423,7 +426,12 @@ footer{
   position:relative;z-index:1;transition:border-color .35s;
 }
 .fi{max-width:1140px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
-.flogo{font-family:var(--font-d);font-size:1.1rem;font-weight:800;color:var(--text2)}
+.flogo{
+  font-family:var(--font-d);font-size:1.15rem;font-weight:800;
+  display:flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,var(--text2) 40%,var(--a));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
 .flinks{display:flex;gap:24px}
 .flinks a{font-size:.82rem;color:var(--text3);transition:color .2s}
 .flinks a:hover{color:var(--text)}
@@ -431,11 +439,11 @@ footer{
 
 /* ── KEYFRAMES ───────────────────────── */
 @keyframes fsu{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
-@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
 @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@keyframes pulsate{0%,100%{box-shadow:0 0 8px var(--green)}50%{box-shadow:0 0 20px var(--green)}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 .fadein{animation:fadeIn .5s ease both}
+@keyframes logoShine{0%,100%{filter:drop-shadow(0 0 8px rgba(240,180,41,.4))}50%{filter:drop-shadow(0 0 20px rgba(240,180,41,.7))}}
 
 /* ── REVEAL ON SCROLL ────────────────── */
 .reveal{opacity:0;transform:translateY(32px);transition:opacity .7s,transform .7s}
