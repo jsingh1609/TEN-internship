@@ -512,19 +512,34 @@ function animatePrice(el, target) {
    SVG GAUGE
 ═══════════════════════════════════════════════════════ */
 function buildGauge(pct) {
-  const r = 44, cx = 56, cy = 56;
-  const start = Math.PI, sweep = Math.PI; // semicircle bottom
-  const rad = (pct / 100) * sweep + start;
-  const x1 = cx + r * Math.cos(start), y1 = cy + r * Math.sin(start);
-  const x2 = cx + r * Math.cos(start + sweep), y2 = cy + r * Math.sin(start + sweep);
-  const sx = cx + r * Math.cos(start), sy = cy + r * Math.sin(start);
-  const ex = cx + r * Math.cos(rad), ey = cy + r * Math.sin(rad);
-  const la = pct > 50 ? 1 : 0;
+  const r = 50, cx = 62, cy = 66;
+  const p = Math.min(pct / 100, 0.9999);
+
+  // Track: top semicircle via two 90° arcs (avoids ambiguous 180° case)
+  const trackD = `M ${cx-r} ${cy} A ${r} ${r} 0 0 0 ${cx} ${cy-r} A ${r} ${r} 0 0 0 ${cx+r} ${cy}`;
+
+  // Progress arc: from left point, sweeping counterclockwise (sweep=0 in SVG = top arc)
+  // endAngle in standard math coords: starts at π (left), sweeps to 0 (right) as p→1
+  const endAngle = Math.PI * (1 - p);
+  const ex = (cx + r * Math.cos(endAngle)).toFixed(2);
+  const ey = (cy - r * Math.sin(endAngle)).toFixed(2); // negate sin: SVG y-axis is flipped
+  const la = p > 0.5 ? 1 : 0;
+  const progressD = `M ${cx-r} ${cy} A ${r} ${r} 0 ${la} 0 ${ex} ${ey}`;
+
   const color = pct >= 85 ? '#43d9a2' : pct >= 70 ? '#f0b429' : '#e07070';
-  return `<svg class="gauge-svg" width="112" height="64" viewBox="0 0 112 64">
-    <path d="M ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2}" stroke="var(--bg3)" stroke-width="10" fill="none" stroke-linecap="round"/>
-    <path d="M ${sx} ${sy} A ${r} ${r} 0 ${la} 1 ${ex} ${ey}" stroke="${color}" stroke-width="10" fill="none" stroke-linecap="round" style="transition:stroke-dashoffset 1.2s ease"/>
-    <text x="56" y="52" text-anchor="middle" fill="${color}" font-family="Fraunces,serif" font-size="18" font-weight="900">${pct}%</text>
+  const glow = pct >= 85 ? 'rgba(67,217,162,.25)' : pct >= 70 ? 'rgba(240,180,41,.25)' : 'rgba(255,107,107,.25)';
+
+  return `<svg class="gauge-svg" width="130" height="76" viewBox="0 10 130 66">
+    <path d="${trackD}" stroke="var(--bg3)" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <path d="${progressD}" stroke="${color}" stroke-width="9" fill="none" stroke-linecap="round"
+      filter="url(#gg)" style="transition:all 1.3s cubic-bezier(.22,1,.36,1)"/>
+    <defs>
+      <filter id="gg" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="${glow}"/>
+      </filter>
+    </defs>
+    <text x="${cx}" y="${cy - 16}" text-anchor="middle" fill="${color}"
+      font-family="Fraunces,serif" font-size="20" font-weight="900">${pct}%</text>
   </svg>`;
 }
 

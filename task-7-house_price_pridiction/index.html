@@ -1,279 +1,213 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>GharMol — India House Price Predictor</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Outfit:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>GharMol — India House Price Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,800;0,900;1,700;1,800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
 </head>
-
 <body>
 
-  <canvas id="bgCanvas"></canvas>
+<canvas id="bgCanvas"></canvas>
 
-  <!-- ── NAV ──────────────────────────────────────── -->
-  <nav>
-    <a href="#hero" class="nl">
-      <svg class="logo-mark" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="32" height="32" rx="9" fill="url(#lg1)" />
-        <path d="M7 22 L16 10 L25 22" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-          fill="none" />
-        <path d="M10.5 22 L10.5 17.5 Q10.5 16 12 16 L14 16 L14 22" stroke="#000" stroke-width="2" stroke-linecap="round"
-          fill="none" />
-        <rect x="18" y="15.5" width="4.5" height="6.5" rx="1" fill="#000" opacity=".85" />
-        <defs>
-          <linearGradient id="lg1" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#f0b429" />
-            <stop offset="1" stop-color="#ffd166" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <span class="logo-text">GharMol</span>
-    </a>
-    <ul class="nm">
-      <li><a href="#hero">Home</a></li>
-      <li><a href="#predictor">Predict</a></li>
-      <li><a href="#features">Features</a></li>
-    </ul>
-    <div class="nr">
-      <button class="tbtn" id="themeBtn" title="Toggle theme">🌙</button>
-      <a href="#predictor" class="ncta">Estimate Price ↗</a>
-    </div>
-  </nav>
-
-  <!-- ── HERO ─────────────────────────────────────── -->
-  <section id="hero">
-    <div class="hbadge">🇮🇳 28 States &amp; 8 UTs · 150+ Cities</div>
-    <h1 class="htitle">
-      Know Your Home's<br>
-      <em>True Worth.</em>
-    </h1>
-    <p class="hsub">India's most comprehensive property price estimator. From Leh to Kanyakumari — every state, every
-      city, every locality.</p>
-    <div class="hbtns">
-      <a href="#predictor" class="bp">Estimate Now →</a>
-      <a href="#features" class="bg-">How It Works</a>
-    </div>
-    <div class="hstats">
-      <div class="hstat">
-        <div class="hsnum"><span class="counter" data-target="36">0</span><span class="acc">+</span></div>
-        <div class="hslbl">States &amp; UTs</div>
-      </div>
-      <div class="hstat">
-        <div class="hsnum"><span class="counter" data-target="150">0</span><span class="acc">+</span></div>
-        <div class="hslbl">Cities Covered</div>
-      </div>
-      <div class="hstat">
-        <div class="hsnum">₹10L<span class="acc">–</span>₹50Cr</div>
-        <div class="hslbl">Price Range</div>
-      </div>
-      <div class="hstat">
-        <div class="hsnum"><span class="counter" data-target="98">0</span><span class="acc">%</span></div>
-        <div class="hslbl">Accuracy</div>
-      </div>
-    </div>
-    <div class="scroll-ind">
-      <div class="sarr">↓</div>
-    </div>
-  </section>
-
-  <!-- ── TICKER ──────────────────────────────────── -->
-  <div class="ticker-wrap">
-    <div class="ticker-track" id="tickerTrack"></div>
+<!-- ── NAV ──────────────────────────────────────── -->
+<nav>
+  <a href="#hero" class="nl">
+    <svg class="logo-mark" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="9" fill="url(#lg1)"/>
+      <path d="M7 22 L16 10 L25 22" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M10.5 22 L10.5 17.5 Q10.5 16 12 16 L14 16 L14 22" stroke="#000" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <rect x="18" y="15.5" width="4.5" height="6.5" rx="1" fill="#000" opacity=".85"/>
+      <defs>
+        <linearGradient id="lg1" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#f0b429"/>
+          <stop offset="1" stop-color="#ffd166"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <span class="logo-text">GharMol</span>
+  </a>
+  <ul class="nm">
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#predictor">Predict</a></li>
+    <li><a href="#features">Features</a></li>
+  </ul>
+  <div class="nr">
+    <button class="tbtn" id="themeBtn" title="Toggle theme">🌙</button>
+    <a href="#predictor" class="ncta">Estimate Price ↗</a>
   </div>
+</nav>
 
-  <!-- ── FEATURES ─────────────────────────────────── -->
-  <section id="features">
-    <p class="eyebrow reveal">Why GharMol</p>
-    <h2 class="stitle reveal">Built for <em style="color:var(--a);font-style:italic">Bharat.</em></h2>
-    <p class="ssub reveal">Every feature designed around India's unique property market — micro-markets, tier cities,
-      amenity scoring.</p>
-    <div class="fgrid">
-      <div class="fcard reveal">
-        <div class="fnumber">01</div>
-        <div class="ficon">🗺️</div>
-        <div class="ftitle">All 36 States &amp; UTs</div>
-        <div class="fdesc">Every Indian state from Andaman &amp; Nicobar to Uttarakhand, with 150+ cities across all
-          tiers calibrated to real market data.</div>
-      </div>
-      <div class="fcard reveal">
-        <div class="fnumber">02</div>
-        <div class="ficon">🏙️</div>
-        <div class="ftitle">Locality Tiers</div>
-        <div class="fdesc">Premium/Central, Mid-Range, and Affordable zones for each city — because SoBo and Thane
-          aren't the same market.</div>
-      </div>
-      <div class="fcard reveal">
-        <div class="fnumber">03</div>
-        <div class="ficon">📊</div>
-        <div class="ftitle">Factor Breakdown</div>
-        <div class="fdesc">Animated bars show exactly how location, area, floor, amenities, age and property type each
-          drive your estimate.</div>
-      </div>
-      <div class="fcard reveal">
-        <div class="fnumber">04</div>
-        <div class="ficon">🎯</div>
-        <div class="ftitle">Confidence Gauge</div>
-        <div class="fdesc">An animated arc gauge shows model confidence for your specific query — more inputs mean
-          higher accuracy.</div>
-      </div>
-      <div class="fcard reveal">
-        <div class="fnumber">05</div>
-        <div class="ficon">🏋️</div>
-        <div class="ftitle">8 Amenity Types</div>
-        <div class="fdesc">Pool, gym, parking, security, lift, clubhouse, garden, power backup — each adjusts price
-          based on city-specific premiums.</div>
-      </div>
-      <div class="fcard reveal">
-        <div class="fnumber">06</div>
-        <div class="ficon">⚡</div>
-        <div class="ftitle">Instant Estimate</div>
-        <div class="fdesc">No sign-up, no API call. Pure local computation with animated price count-up. Result in under
-          a second.</div>
-      </div>
+<!-- ── HERO ─────────────────────────────────────── -->
+<section id="hero">
+  <div class="hbadge">🇮🇳 28 States · 8 Union Territories · 150+ Cities</div>
+  <h1 class="htitle">
+    Know Your Home's<br>
+    <em>True Worth.</em>
+  </h1>
+  <p class="hsub">India's most comprehensive property price estimator. From Leh to Kanyakumari — every state, every city, every locality.</p>
+  <div class="hbtns">
+    <a href="#predictor" class="bp">Estimate Now →</a>
+    <a href="#features" class="bg-">How It Works</a>
+  </div>
+  <div class="hstats">
+    <div class="hstat">
+      <div class="hsnum"><span class="counter" data-target="36">0</span><span class="acc">+</span></div>
+      <div class="hslbl">States &amp; UTs</div>
     </div>
-  </section>
+    <div class="hstat">
+      <div class="hsnum"><span class="counter" data-target="150">0</span><span class="acc">+</span></div>
+      <div class="hslbl">Cities Covered</div>
+    </div>
+    <div class="hstat">
+      <div class="hsnum">₹10L<span class="acc">–</span>₹50Cr</div>
+      <div class="hslbl">Price Range</div>
+    </div>
+    <div class="hstat">
+      <div class="hsnum"><span class="counter" data-target="98">0</span><span class="acc">%</span></div>
+      <div class="hslbl">Accuracy</div>
+    </div>
+  </div>
+  <div class="scroll-ind"><div class="sarr"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 5.5L8 10.5L13 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+</section>
 
-  <!-- ── PREDICTOR ─────────────────────────────── -->
-  <section id="predictor">
-    <div class="pinner">
-      <p class="eyebrow reveal">The Estimator</p>
-      <h2 class="stitle reveal">Your property, <em style="color:var(--a);font-style:italic">priced.</em></h2>
-      <p class="ssub reveal">Select your state, pick a city, fill in the details — get your estimate with a full
-        breakdown.</p>
+<!-- ── TICKER ──────────────────────────────────── -->
+<div class="ticker-wrap"><div class="ticker-track" id="tickerTrack"></div></div>
 
-      <div class="alayout">
-        <!-- FORM -->
-        <aside class="sidebar">
-          <div class="sbhdr"><span class="sbicon">🏠</span><span class="sbtitle">Property Details</span></div>
+<!-- ── FEATURES ─────────────────────────────────── -->
+<section id="features">
+  <p class="eyebrow reveal">Why GharMol</p>
+  <h2 class="stitle reveal">Built for <em style="color:var(--a);font-style:italic">Bharat.</em></h2>
+  <p class="ssub reveal">Every feature designed around India's unique property market — micro-markets, tier cities, amenity scoring.</p>
+  <div class="fgrid">
+    <div class="fcard reveal"><div class="fnumber">01</div><div class="ficon">🗺️</div><div class="ftitle">All 36 States &amp; UTs</div><div class="fdesc">Every Indian state from Andaman &amp; Nicobar to Uttarakhand, with 150+ cities across all tiers calibrated to real market data.</div></div>
+    <div class="fcard reveal"><div class="fnumber">02</div><div class="ficon">🏙️</div><div class="ftitle">Locality Tiers</div><div class="fdesc">Premium/Central, Mid-Range, and Affordable zones for each city — because SoBo and Thane aren't the same market.</div></div>
+    <div class="fcard reveal"><div class="fnumber">03</div><div class="ficon">📊</div><div class="ftitle">Factor Breakdown</div><div class="fdesc">Animated bars show exactly how location, area, floor, amenities, age and property type each drive your estimate.</div></div>
+    <div class="fcard reveal"><div class="fnumber">04</div><div class="ficon">🎯</div><div class="ftitle">Confidence Gauge</div><div class="fdesc">An animated arc gauge shows model confidence for your specific query — more inputs mean higher accuracy.</div></div>
+    <div class="fcard reveal"><div class="fnumber">05</div><div class="ficon">🏋️</div><div class="ftitle">8 Amenity Types</div><div class="fdesc">Pool, gym, parking, security, lift, clubhouse, garden, power backup — each adjusts price based on city-specific premiums.</div></div>
+    <div class="fcard reveal"><div class="fnumber">06</div><div class="ficon">⚡</div><div class="ftitle">Instant Estimate</div><div class="fdesc">No sign-up, no API call. Pure local computation with animated price count-up. Result in under a second.</div></div>
+  </div>
+</section>
 
-          <div class="fg">
-            <label class="fl">State</label>
-            <div class="sw"><select class="fsel" id="stateSelect"></select></div>
-          </div>
-          <div class="fg">
-            <label class="fl">City</label>
-            <div class="sw"><select class="fsel" id="citySelect"></select></div>
-          </div>
-          <div class="fg">
-            <label class="fl">Locality Tier</label>
-            <div class="sw">
-              <select class="fsel" id="tier">
-                <option value="premium">Premium / Central</option>
-                <option value="mid" selected>Mid-Range</option>
-                <option value="affordable">Affordable / Suburbs</option>
-              </select>
-            </div>
-          </div>
-          <div class="fg">
-            <label class="fl">BHK Type</label>
-            <div class="sw">
-              <select class="fsel" id="bhk">
-                <option value="1">1 BHK</option>
-                <option value="2" selected>2 BHK</option>
-                <option value="3">3 BHK</option>
-                <option value="4">4 BHK</option>
-                <option value="5">5 BHK / Villa</option>
-              </select>
-            </div>
-          </div>
-          <div class="fg">
-            <label class="fl">Property Type</label>
-            <div class="sw">
-              <select class="fsel" id="propType">
-                <option value="flat" selected>Apartment / Flat</option>
-                <option value="independent">Independent House</option>
-                <option value="villa">Villa / Bungalow</option>
-                <option value="studio">Studio</option>
-                <option value="plot">Plot / Land</option>
-              </select>
-            </div>
-          </div>
-          <div class="fg">
-            <label class="fl">Built-up Area (sq ft)</label>
-            <div class="rval" id="areaVal">1,200 sq ft</div>
-            <input type="range" id="area" min="300" max="8000" value="1200" step="50" />
-            <div class="rlbls"><span>300</span><span>8,000</span></div>
-          </div>
-          <div class="fg">
-            <label class="fl">Floor</label>
-            <div class="sw">
-              <select class="fsel" id="floor">
-                <option value="ground">Ground Floor</option>
-                <option value="low">Low (1–5)</option>
-                <option value="mid" selected>Mid (6–15)</option>
-                <option value="high">High (16–30)</option>
-                <option value="penthouse">Penthouse / Top</option>
-              </select>
-            </div>
-          </div>
-          <div class="fg">
-            <label class="fl">Property Age (years)</label>
-            <div class="rval" id="ageVal">5 years</div>
-            <input type="range" id="age" min="0" max="40" value="5" step="1" />
-            <div class="rlbls"><span>New</span><span>40 yr</span></div>
-          </div>
-          <div class="fg">
-            <label class="fl">Amenities</label>
-            <div class="cbg" id="amenities">
-              <div class="cbi on" data-v="parking">
-                <div class="cdot">✓</div>Parking
-              </div>
-              <div class="cbi on" data-v="security">
-                <div class="cdot">✓</div>Security
-              </div>
-              <div class="cbi" data-v="gym">
-                <div class="cdot"></div>Gym
-              </div>
-              <div class="cbi" data-v="pool">
-                <div class="cdot"></div>Pool
-              </div>
-              <div class="cbi on" data-v="lift">
-                <div class="cdot">✓</div>Lift
-              </div>
-              <div class="cbi" data-v="clubhouse">
-                <div class="cdot"></div>Clubhouse
-              </div>
-              <div class="cbi" data-v="garden">
-                <div class="cdot"></div>Garden
-              </div>
-              <div class="cbi" data-v="powerbackup">
-                <div class="cdot"></div>Power Backup
-              </div>
-            </div>
-          </div>
-          <button class="pbtn" id="predictBtn">✦ Predict Price</button>
-        </aside>
+<!-- ── PREDICTOR ─────────────────────────────── -->
+<section id="predictor">
+  <div class="pinner">
+    <p class="eyebrow reveal">The Estimator</p>
+    <h2 class="stitle reveal">Your property, <em style="color:var(--a);font-style:italic">priced.</em></h2>
+    <p class="ssub reveal">Select your state, pick a city, fill in the details — get your estimate with a full breakdown.</p>
 
-        <!-- RESULT PANEL -->
-        <div class="mpanel" id="mpanel">
-          <div class="pstate">
-            <div class="pi">🏡</div>
-            <div class="pt">Select your state &amp; city, fill in details</div>
-            <div class="ph">Hit Predict Price to get your personalised estimate</div>
+    <div class="alayout">
+      <!-- FORM -->
+      <aside class="sidebar">
+        <div class="sbhdr"><span class="sbicon">🏠</span><span class="sbtitle">Property Details</span></div>
+
+        <div class="fg">
+          <label class="fl">State</label>
+          <div class="sw"><select class="fsel" id="stateSelect"></select></div>
+        </div>
+        <div class="fg">
+          <label class="fl">City</label>
+          <div class="sw"><select class="fsel" id="citySelect"></select></div>
+        </div>
+        <div class="fg">
+          <label class="fl">Locality Tier</label>
+          <div class="sw">
+            <select class="fsel" id="tier">
+              <option value="premium">Premium / Central</option>
+              <option value="mid" selected>Mid-Range</option>
+              <option value="affordable">Affordable / Suburbs</option>
+            </select>
           </div>
+        </div>
+        <div class="fg">
+          <label class="fl">BHK Type</label>
+          <div class="sw">
+            <select class="fsel" id="bhk">
+              <option value="1">1 BHK</option>
+              <option value="2" selected>2 BHK</option>
+              <option value="3">3 BHK</option>
+              <option value="4">4 BHK</option>
+              <option value="5">5 BHK / Villa</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Property Type</label>
+          <div class="sw">
+            <select class="fsel" id="propType">
+              <option value="flat" selected>Apartment / Flat</option>
+              <option value="independent">Independent House</option>
+              <option value="villa">Villa / Bungalow</option>
+              <option value="studio">Studio</option>
+              <option value="plot">Plot / Land</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Built-up Area (sq ft)</label>
+          <div class="rval" id="areaVal">1,200 sq ft</div>
+          <input type="range" id="area" min="300" max="8000" value="1200" step="50"/>
+          <div class="rlbls"><span>300</span><span>8,000</span></div>
+        </div>
+        <div class="fg">
+          <label class="fl">Floor</label>
+          <div class="sw">
+            <select class="fsel" id="floor">
+              <option value="ground">Ground Floor</option>
+              <option value="low">Low (1–5)</option>
+              <option value="mid" selected>Mid (6–15)</option>
+              <option value="high">High (16–30)</option>
+              <option value="penthouse">Penthouse / Top</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Property Age (years)</label>
+          <div class="rval" id="ageVal">5 years</div>
+          <input type="range" id="age" min="0" max="40" value="5" step="1"/>
+          <div class="rlbls"><span>New</span><span>40 yr</span></div>
+        </div>
+        <div class="fg">
+          <label class="fl">Amenities</label>
+          <div class="cbg" id="amenities">
+            <div class="cbi on" data-v="parking"><div class="cdot">✓</div>Parking</div>
+            <div class="cbi on" data-v="security"><div class="cdot">✓</div>Security</div>
+            <div class="cbi" data-v="gym"><div class="cdot"></div>Gym</div>
+            <div class="cbi" data-v="pool"><div class="cdot"></div>Pool</div>
+            <div class="cbi on" data-v="lift"><div class="cdot">✓</div>Lift</div>
+            <div class="cbi" data-v="clubhouse"><div class="cdot"></div>Clubhouse</div>
+            <div class="cbi" data-v="garden"><div class="cdot"></div>Garden</div>
+            <div class="cbi" data-v="powerbackup"><div class="cdot"></div>Power Backup</div>
+          </div>
+        </div>
+        <button class="pbtn" id="predictBtn">✦ Predict Price</button>
+      </aside>
+
+      <!-- RESULT PANEL -->
+      <div class="mpanel" id="mpanel">
+        <div class="pstate">
+          <div class="pi">🏡</div>
+          <div class="pt">Select your state &amp; city, fill in details</div>
+          <div class="ph">Hit Predict Price to get your personalised estimate</div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <footer>
-    <div class="fi">
-      <div class="flogo">✦ GharMol</div>
-      <div class="flinks">
-        <a href="#hero">Home</a><a href="#features">Features</a><a href="#predictor">Predictor</a>
-      </div>
-      <div class="fcopy">Built with ♥ for Indian home buyers — Jasjeet Singh</div>
+<footer>
+  <div class="fi">
+    <div class="flogo">✦ GharMol</div>
+    <div class="flinks">
+      <a href="#hero">Home</a><a href="#features">Features</a><a href="#predictor">Predictor</a>
     </div>
-  </footer>
+    <div class="fcopy">Built with ♥ for Indian home buyers — Jasjeet Singh</div>
+  </div>
+</footer>
 
-  <script src="script.js" defer></script>
+<script src="script.js" defer></script>
 </body>
-
 </html>
