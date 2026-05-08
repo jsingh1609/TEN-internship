@@ -1,5 +1,20 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import * as mammoth from "mammoth";
+import mermaid from "mermaid";
+
+mermaid.initialize({ startOnLoad: false, theme: 'dark', fontFamily: 'Syne' });
+
+const MermaidChart = ({ chart }) => {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (chart && ref.current) {
+      mermaid.render(`mermaid-${Date.now()}`, chart).then((result) => {
+        ref.current.innerHTML = result.svg;
+      }).catch(e => console.error("Mermaid render error", e));
+    }
+  }, [chart]);
+  return <div className="mermaid-box" ref={ref} />;
+};
 
 const G = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Syne:wght@400;500;600&family=Syne+Mono&display=swap');`;
 
@@ -231,12 +246,44 @@ textarea:focus{border-color:rgba(0,210,170,0.28);background:rgba(0,210,170,0.015
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
 @keyframes slideIn{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
+
+.hist-panel { position: fixed; top: 0; right: 0; bottom: 0; width: 340px; background: rgba(7,9,13,0.95); backdrop-filter: blur(20px); border-left: 1px solid var(--border); transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 9000; display: flex; flex-direction: column; }
+.hist-panel.open { transform: translateX(0); box-shadow: -20px 0 60px rgba(0,0,0,0.5); }
+.hist-head { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.hist-title { font-family: var(--sans); font-size: 1rem; font-weight: 600; color: var(--text); }
+.hist-close { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 6px; }
+.hist-close:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.hist-list { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.8rem; }
+.hist-item { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; cursor: pointer; transition: all 0.2s; position: relative; }
+.hist-item:hover { border-color: rgba(0,210,170,0.3); background: rgba(0,210,170,0.03); }
+.hist-name { font-size: 0.85rem; font-weight: 500; color: var(--text); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 20px; }
+.hist-time { font-family: var(--mono); font-size: 0.65rem; color: var(--text-dim); }
+.hist-del { position: absolute; right: 8px; top: 8px; background: none; border: none; color: var(--text-dim); cursor: pointer; opacity: 0; transition: opacity 0.2s, color 0.2s; }
+.hist-item:hover .hist-del { opacity: 1; }
+.hist-del:hover { color: rgba(230,100,90,0.8); }
+
+.mermaid-box { width: 100%; background: rgba(255,255,255,0.015); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; overflow-x: auto; display: flex; justify-content: center; margin-top: 0.5rem; }
+
+.startup-splash { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
+.startup-splash.exit { opacity: 0; visibility: hidden; }
+.su-logo { width: 80px; height: 80px; margin-bottom: 2.5rem; position: relative; }
+.su-logo::before { content: ''; position: absolute; inset: -20px; border: 1px solid rgba(0,210,170,0.2); border-radius: 50%; animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+@keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+.su-logo svg { width: 100%; height: 100%; stroke: var(--teal); stroke-width: 1; opacity: 0.8; }
+.su-text { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--teal); opacity: 0.7; overflow: hidden; border-right: 2px solid var(--teal); white-space: nowrap; animation: typing 1.5s steps(30, end), blink 0.75s step-end infinite; }
+@keyframes typing { from { width: 0 } to { width: 100% } }
+@keyframes blink { from, to { border-color: transparent } 50% { border-color: var(--teal); } }
+
+.top-nav { position: absolute; top: 1.5rem; right: 1.5rem; z-index: 20; }
+.btn-hist { background: rgba(0,210,170,0.05); border: 1px solid rgba(0,210,170,0.15); border-radius: 8px; padding: 0.5rem 1rem; color: var(--teal); font-family: var(--mono); font-size: 0.7rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
+.btn-hist:hover { background: rgba(0,210,170,0.1); border-color: rgba(0,210,170,0.3); }
 `;
 
 const MODES = [
   { id: "standard", label: "Standard" },
   { id: "bullets", label: "Bullets" },
   { id: "academic", label: "Academic" },
+  { id: "diagram", label: "Diagram" },
 ];
 
 const SYS = `You are an expert notes analyst. Return ONLY a valid JSON object with NO markdown fences or preamble:
@@ -246,13 +293,15 @@ const SYS = `You are an expert notes analyst. Return ONLY a valid JSON object wi
   "actionItems": ["action 1","action 2"],
   "keywords": ["term1","term2","term3","term4","term5","term6"],
   "tone": "Technical | Casual | Academic | Professional | Creative | Journalistic",
-  "wordCount": 123
+  "wordCount": 123,
+  "diagram": "Valid Mermaid markdown strictly without enclosing backticks. Flowchart or Mindmap summarizing the structure. Leave empty string if diagram mode not requested."
 }
 keyPoints = 3-6 insights; actionItems = tasks found (empty array if none, max 5); keywords = 5-8 topics; wordCount = approximate count.`;
 
 function modeHint(m) {
   if (m === "bullets") return "Keep summary to 1 sentence. Bullet points under 10 words each.";
   if (m === "academic") return "Use formal academic register. Emphasize methodology, findings, theoretical significance.";
+  if (m === "diagram") return "Focus on structural mapping. Provide a highly detailed Mermaid.js flowchart or mindmap in the 'diagram' JSON field illustrating the core concepts.";
   return "Balanced professional summary for general use.";
 }
 
@@ -290,7 +339,46 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [drag, setDrag] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [history, setHistory] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('smart_notes_history') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [histOpen, setHistOpen] = useState(false);
   const inputRef = useRef();
+
+  useEffect(() => {
+    const t = setTimeout(() => setInitialLoad(false), 2600);
+    return () => clearTimeout(t);
+  }, []);
+
+  const saveToHistory = (res, fn) => {
+    const item = { id: Date.now(), name: fn, date: new Date().toLocaleString(), result: res };
+    setHistory(prev => {
+      const next = [item, ...prev].slice(0, 15);
+      localStorage.setItem('smart_notes_history', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const loadHistoryItem = (item) => {
+    setResult(item.result);
+    setFile({ name: item.name, size: 0 }); // Mock visual state
+    setNotes("");
+    setHistOpen(false);
+  };
+
+  const deleteHistoryItem = (e, id) => {
+    e.stopPropagation();
+    setHistory(prev => {
+      const next = prev.filter(i => i.id !== id);
+      localStorage.setItem('smart_notes_history', JSON.stringify(next));
+      return next;
+    });
+  };
 
   const handleFile = useCallback(async (f) => {
     setError(null);
@@ -410,7 +498,9 @@ export default function App() {
         raw = (data.content || []).map(b => b.text || "").join("");
       }
 
-      setResult(JSON.parse(raw.replace(/```json|```/g, "").trim()));
+      const parsed = JSON.parse(raw.replace(/```json|```|```mermaid/g, "").trim());
+      setResult(parsed);
+      saveToHistory(parsed, file?.name || "Pasted Text");
     } catch (err) { setError(err.message || "Analysis failed. Please try again."); }
     finally { setLoading(false); }
   };
@@ -420,8 +510,11 @@ export default function App() {
   const [msgIdx, setMsgIdx] = useState(0);
   const MSGS = ["Parsing structure","Reading document","Extracting key ideas","Identifying themes","Spotting action items","Distilling insights","Composing summary","Almost there"];
   useEffect(() => {
-    if (!loading) { setMsgIdx(0); return; }
-    const t = setInterval(() => setMsgIdx(i => (i + 1) % MSGS.length), 1800);
+    if (!loading) {
+      const st = setTimeout(() => setMsgIdx(0), 0);
+      return () => clearTimeout(st);
+    }
+    const t = setInterval(() => setMsgIdx(i => (i + 1) % 8), 1800);
     return () => clearInterval(t);
   }, [loading]);
   const PARTICLES = Array.from({length:14},(_,i)=>({
@@ -436,6 +529,13 @@ export default function App() {
         <div className="orb orb-1" /><div className="orb orb-2" /><div className="orb orb-3" />
         <div className="grain" />
         <div className="page">
+
+          <div className="top-nav">
+            <button className="btn-hist" onClick={() => setHistOpen(true)}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              History
+            </button>
+          </div>
 
           <header className="header">
             <div className="eyebrow">Intelligence Layer · AI Powered</div>
@@ -526,6 +626,13 @@ export default function App() {
                 <p className="sum-body">{result.summary}</p>
               </div>
 
+              {result.diagram && (
+                <div className="card">
+                  <div className="c-label">Diagrammatic Representation</div>
+                  <MermaidChart chart={result.diagram} />
+                </div>
+              )}
+
               <div className="grid2">
                 {result.keyPoints?.length > 0 && (
                   <div className="card">
@@ -576,6 +683,36 @@ export default function App() {
               </div>
             </div>
           )}
+        </div>
+
+        <div className={`startup-splash ${!initialLoad ? 'exit' : ''}`}>
+          <div className="su-logo">
+            <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+            </svg>
+          </div>
+          <div className="su-text" style={{width: initialLoad ? 'auto' : '100%'}}>INITIALIZING INTELLIGENCE LAYER</div>
+        </div>
+
+        <div className={`hist-panel ${histOpen ? 'open' : ''}`}>
+          <div className="hist-head">
+            <div className="hist-title">Past Analyses</div>
+            <button className="hist-close" onClick={() => setHistOpen(false)}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div className="hist-list">
+            {history.length === 0 ? <div style={{color:'var(--text-dim)',fontSize:'0.8rem',textAlign:'center',marginTop:'2rem'}}>No history yet.</div> : null}
+            {history.map(item => (
+              <div key={item.id} className="hist-item" onClick={() => loadHistoryItem(item)}>
+                <div className="hist-name">{item.name}</div>
+                <div className="hist-time">{item.date}</div>
+                <button className="hist-del" onClick={(e) => deleteHistoryItem(e, item.id)}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Full-screen loading overlay */}
