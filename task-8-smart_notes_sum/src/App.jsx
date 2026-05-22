@@ -2,18 +2,249 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import * as mammoth from "mammoth";
 import mermaid from "mermaid";
 
-mermaid.initialize({ startOnLoad: false, theme: 'default', fontFamily: 'Inter, sans-serif' });
+mermaid.initialize({ startOnLoad: false, theme: 'dark', fontFamily: 'Inter, sans-serif', suppressErrorRendering: true });
 
-const MermaidChart = ({ chart }) => {
+const MermaidChart = ({ chart, theme, nodes = [] }) => {
   const ref = useRef(null);
+  const containerRef = useRef(null);
+  const [error, setError] = useState(null);
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [selectedNode, setSelectedNode] = useState(null);
+
+  // Reset zoom, pan, and selection when chart changes
+  useEffect(() => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+    setSelectedNode(null);
+  }, [chart]);
+
+  // Bind passive wheel event listener to control zoom without scrolling the page
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e) => {
+      e.preventDefault();
+      const zoomFactor = 1.08;
+      setScale(s => {
+        if (e.deltaY < 0) {
+          return Math.min(s * zoomFactor, 4);
+        } else {
+          return Math.max(s / zoomFactor, 0.5);
+        }
+      });
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
+
+  // Bind click event listeners to SVG nodes
+  useEffect(() => {
+    if (!ref.current || error || !nodes.length) return;
+
+    // Find all node elements in the rendered SVG
+    const svgNodeElements = ref.current.querySelectorAll('.node, .cluster');
+    
+    const handleNodeClick = (e) => {
+      e.stopPropagation();
+      const nodeEl = e.currentTarget;
+      
+      // Clear previous highlights
+      svgNodeElements.forEach(el => {
+        el.style.stroke = '';
+        el.style.strokeWidth = '';
+        el.style.filter = '';
+      });
+      
+      // Highlight the clicked node
+      nodeEl.style.stroke = 'var(--accent)';
+      nodeEl.style.strokeWidth = '3px';
+      nodeEl.style.filter = 'drop-shadow(0 0 8px var(--accent-hi))';
+
+      // Find matched node details by comparing text or ID
+      const nodeText = nodeEl.textContent || "";
+      const nodeId = nodeEl.id || "";
+      
+      const matched = nodes.find(n => {
+        const cleanLabel = n.label.replace(/"/g, '').trim().toLowerCase();
+        const cleanText = nodeText.toLowerCase().trim();
+        return cleanText.includes(cleanLabel) || 
+               cleanLabel.includes(cleanText) ||
+               nodeId.includes(`-${n.id}-`) ||
+               nodeId.endsWith(`-${n.id}`);
+      });
+
+      if (matched) {
+        setSelectedNode(matched);
+      } else {
+        setSelectedNode({
+          label: nodeText.trim(),
+          details: "No additional details available for this specific node."
+        });
+      }
+    };
+
+    svgNodeElements.forEach(el => {
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', handleNodeClick);
+    });
+
+    return () => {
+      svgNodeElements.forEach(el => {
+        if (el) {
+          el.removeEventListener('click', handleNodeClick);
+        }
+      });
+    };
+  }, [chart, error, nodes]);
+
   useEffect(() => {
     if (chart && ref.current) {
-      mermaid.render(`mermaid-${Date.now()}`, chart).then((result) => {
-        ref.current.innerHTML = result.svg;
-      }).catch(e => console.error("Mermaid render error", e));
+      setError(null);
+      ref.current.innerHTML = "";
+
+      const cleanedChart = chart
+        .replace(/```mermaid/gi, "")
+        .replace(/```/g, "")
+        .trim();
+
+      try {
+        mermaid.initialize({ 
+          startOnLoad: false, 
+          theme: theme === 'dark' ? 'dark' : 'default', 
+          fontFamily: 'Inter, sans-serif',
+          suppressErrorRendering: true
+        });
+        
+        const uniqueId = `mermaid-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+        
+        mermaid.render(uniqueId, cleanedChart)
+          .then((result) => {
+            if (ref.current) {
+              ref.current.innerHTML = result.svg;
+            }
+          })
+          .catch(e => {
+            console.error("Mermaid render error:", e);
+            setError(e.message || "Invalid Mermaid syntax");
+          });
+      } catch (e) {
+        console.error("Mermaid init/render error:", e);
+        setError(e.message || "Invalid Mermaid syntax");
+      }
     }
-  }, [chart]);
-  return <div className="mermaid-box" ref={ref} />;
+  }, [chart, theme]);
+
+  const handleMouseDown = (e) => {
+    if (e.button !== 0) return; // Only left click
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    setPosition({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const zoomIn = () => setScale(s => Math.min(s * 1.2, 4));
+  const zoomOut = () => setScale(s => Math.max(s / 1.2, 0.5));
+  const resetZoom = () => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+    setSelectedNode(null);
+    if (ref.current) {
+      const svgNodeElements = ref.current.querySelectorAll('.node, .cluster');
+      svgNodeElements.forEach(el => {
+        el.style.stroke = '';
+        el.style.strokeWidth = '';
+        el.style.filter = '';
+      });
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="mermaid-error-box">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--accent)', flexShrink: 0 }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <strong style={{ color: 'var(--text)', fontSize: '0.88rem', fontFamily: 'var(--sans)' }}>Diagram rendering failed</strong>
+        </div>
+        <div className="mermaid-error-text">
+          <span>The AI-generated diagram contains syntax that Mermaid could not parse.</span>
+        </div>
+        <details className="mermaid-raw-details">
+          <summary>View raw diagram code</summary>
+          <pre>{chart}</pre>
+        </details>
+      </div>
+    );
+  }
+
+  const hasInspector = nodes.length > 0;
+
+  return (
+    <div className={`mermaid-interactive-container ${hasInspector ? 'with-inspector' : ''}`}>
+      <div className="mermaid-viewport-wrapper">
+        {/* Zoom Controls */}
+        <div className="mermaid-zoom-controls">
+          <button className="zoom-btn" onClick={zoomIn} title="Zoom In">+</button>
+          <button className="zoom-btn" onClick={zoomOut} title="Zoom Out">-</button>
+          <button className="zoom-btn" onClick={resetZoom} title="Reset Zoom">⟲</button>
+        </div>
+
+        {/* Viewport for Diagram */}
+        <div 
+          className="mermaid-viewport"
+          ref={containerRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+        >
+          <div 
+            className="mermaid-transform-layer"
+            style={{ 
+              transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+              transformOrigin: 'center center',
+              transition: isDragging ? 'none' : 'transform 0.15s ease-out'
+            }}
+            ref={ref}
+          />
+        </div>
+      </div>
+
+      {hasInspector && (
+        <div className="mermaid-inspector-panel">
+          <div className="inspector-title">Diagram Inspector</div>
+          {selectedNode ? (
+            <div className="inspector-content">
+              <div className="inspector-node-label">{selectedNode.label}</div>
+              <div className="inspector-node-details">{selectedNode.details}</div>
+            </div>
+          ) : (
+            <div className="inspector-placeholder">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginBottom: '8px', opacity: 0.5 }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+              <span>Click on any node in the diagram to view detailed explanations.</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
 
 const G = `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');`;
@@ -51,13 +282,39 @@ ${G}
   --radius:14px;
   --radius-sm:10px;
   --radius-xs:6px;
+  --bg-gradient: linear-gradient(180deg,rgba(218,119,86,0.04) 0%,rgba(245,240,235,0.5) 60%,transparent 100%);
 }
-html,body{background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
 
-.root{position:relative;min-height:100vh;overflow-x:hidden;font-family:var(--sans);color:var(--text);}
+:root[data-theme="dark"]{
+  --bg:#191816;
+  --bg-warm:#22201C;
+  --surface:#262421;
+  --surface-hover:#2C2A26;
+  --border:#383530;
+  --border-hi:rgba(229,138,107,0.35);
+  --accent:#E58A6B;
+  --accent-hover:#F09A7D;
+  --accent-light:rgba(229,138,107,0.08);
+  --accent-medium:rgba(229,138,107,0.15);
+  --accent-glow:rgba(229,138,107,0.12);
+  --text:#ECE7E1;
+  --text-secondary:#B5AEA5;
+  --text-muted:#8E877F;
+  --text-dim:#66615A;
+  --bg-gradient: linear-gradient(180deg,rgba(229,138,107,0.04) 0%,rgba(34,32,28,0.5) 60%,transparent 100%);
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.3);
+  --shadow-lg:0 12px 32px rgba(0,0,0,0.4);
+  --shadow-accent:0 4px 20px rgba(229,138,107,0.15);
+}
+
+#root{width:100%;max-width:100%;border:none;margin:0 auto;text-align:left;display:block;}
+html,body{background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;transition:background-color 0.3s ease, color 0.3s ease;}
+
+.root{position:relative;min-height:100vh;overflow-x:hidden;font-family:var(--sans);color:var(--text);text-align:left;}
 
 /* Warm ambient background */
-.root::before{content:'';position:fixed;top:0;left:0;right:0;height:400px;background:linear-gradient(180deg,rgba(218,119,86,0.04) 0%,rgba(245,240,235,0.5) 60%,transparent 100%);z-index:0;pointer-events:none;}
+.root::before{content:'';position:fixed;top:0;left:0;right:0;height:400px;background:var(--bg-gradient);z-index:0;pointer-events:none;transition:background 0.3s ease;}
 .root::after{content:'';position:fixed;bottom:0;left:0;right:0;height:300px;background:linear-gradient(0deg,rgba(218,119,86,0.02) 0%,transparent 100%);z-index:0;pointer-events:none;}
 
 /* Subtle warm orbs */
@@ -215,7 +472,8 @@ textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(218,119,86,0
 @keyframes slideIn{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:translateX(0);}}
 
 /* ── History Panel ── */
-.hist-panel{position:fixed;top:0;right:0;bottom:0;width:340px;background:rgba(250,249,246,0.97);backdrop-filter:blur(20px);border-left:1px solid var(--border);transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.16,1,0.3,1);z-index:9000;display:flex;flex-direction:column;}
+.hist-panel{position:fixed;top:0;right:0;bottom:0;width:340px;background:rgba(25,24,22,0.97);backdrop-filter:blur(20px);border-left:1px solid var(--border);transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.16,1,0.3,1);z-index:9000;display:flex;flex-direction:column;}
+:root[data-theme="light"] .hist-panel{background:rgba(250,249,246,0.97);}
 .hist-panel.open{transform:translateX(0);box-shadow:-12px 0 40px rgba(0,0,0,0.08);}
 .hist-head{padding:1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .hist-title{font-family:var(--sans);font-size:0.95rem;font-weight:600;color:var(--text);}
@@ -233,6 +491,151 @@ textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(218,119,86,0
 /* ── Mermaid ── */
 .mermaid-box{width:100%;background:var(--bg-warm);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;overflow-x:auto;display:flex;justify-content:center;margin-top:0.5rem;}
 
+.mermaid-interactive-container {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+  margin-top: 0.8rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+.mermaid-interactive-container:hover {
+  border-color: rgba(218,119,86,0.18);
+  box-shadow: var(--shadow-md);
+}
+@media (min-width: 768px) {
+  .mermaid-interactive-container.with-inspector {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr;
+  }
+}
+.mermaid-viewport-wrapper {
+  position: relative;
+  height: 450px;
+  background: var(--bg-warm);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.mermaid-viewport {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.mermaid-transform-layer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mermaid-transform-layer svg {
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+  user-select: none;
+}
+.mermaid-zoom-controls {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+.zoom-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.zoom-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--surface-hover);
+  transform: translateY(-1px);
+}
+.zoom-btn:active {
+  transform: translateY(0);
+}
+.mermaid-inspector-panel {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: 450px;
+  box-sizing: border-box;
+}
+@media (min-width: 768px) {
+  .mermaid-inspector-panel {
+    border-top: none;
+    border-left: 1px solid var(--border);
+    max-height: 450px;
+  }
+}
+.inspector-title {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+}
+.inspector-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeUp 0.3s ease;
+}
+.inspector-node-label {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+.inspector-node-details {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+.inspector-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 160px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  padding: 1.5rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-warm);
+}
+
+
 /* ── Startup Splash ── */
 .startup-splash{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.8s ease,visibility 0.8s ease;}
 .startup-splash.exit{opacity:0;visibility:hidden;}
@@ -245,7 +648,7 @@ textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(218,119,86,0
 @keyframes blink{from,to{border-color:transparent}50%{border-color:var(--accent);}}
 
 /* ── Top Nav ── */
-.top-nav{position:absolute;top:1.5rem;right:1.5rem;z-index:20;}
+.top-nav{position:absolute;top:1.5rem;right:1.5rem;z-index:20;display:flex;gap:8px;}
 .btn-hist{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.9rem;color:var(--text-secondary);font-family:var(--mono);font-size:0.68rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;letter-spacing:0.04em;text-transform:uppercase;font-weight:500;box-shadow:var(--shadow-sm);}
 .btn-hist:hover{background:var(--surface-hover);border-color:rgba(218,119,86,0.25);color:var(--accent);box-shadow:var(--shadow-md);}
 
@@ -291,6 +694,13 @@ textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(218,119,86,0
 @keyframes dotPulse{0%,100%{opacity:0.3;transform:scale(0.8);}50%{opacity:1;transform:scale(1.1);}}
 .explain-loading-text{font-size:0.85rem;color:var(--text-muted);font-weight:500;}
 
+.mermaid-error-box{background:rgba(218,119,86,0.04);border:1px dashed rgba(218,119,86,0.25);border-radius:var(--radius-sm);padding:1.2rem;margin-top:0.5rem;display:flex;flex-direction:column;gap:8px;text-align:left;}
+.mermaid-error-text{font-size:0.82rem;color:var(--text-secondary);line-height:1.5;}
+.mermaid-raw-details{width:100%;margin-top:4px;}
+.mermaid-raw-details summary{font-family:var(--mono);font-size:0.68rem;color:var(--accent);cursor:pointer;outline:none;font-weight:600;user-select:none;}
+.mermaid-raw-details summary:hover{color:var(--accent-hover);}
+.mermaid-raw-details pre{margin-top:8px;padding:0.8rem;background:var(--bg-warm);border:1px solid var(--border);border-radius:var(--radius-xs);font-family:var(--mono);font-size:0.72rem;color:var(--text-secondary);overflow-x:auto;white-space:pre-wrap;word-break:break-all;}
+
 @keyframes spin{to{transform:rotate(360deg);}}
 `;
 
@@ -309,13 +719,21 @@ const SYS = `You are an expert notes analyst. Return ONLY a valid JSON object wi
   "keywords": ["term1","term2","term3","term4","term5","term6"],
   "tone": "Technical | Casual | Academic | Professional | Creative | Journalistic",
   "wordCount": 123,
-  "diagram": "Valid Mermaid markdown strictly without enclosing backticks. Flowchart or Mindmap summarizing the structure. Leave empty string if diagram mode not requested."
+  "diagram": "Valid Mermaid markdown strictly without enclosing backticks. A comprehensive flowchart TD or mindmap summarizing the structure. Crucial: Do not use parentheses/brackets inside node text labels unless they are enclosed in double quotes (e.g. A[\\\"Label (with brackets)\\\"])."
 }
 keyPoints = 3-6 insights; actionItems = tasks found (empty array if none, max 5); keywords = 5-8 topics; wordCount = approximate count.`;
 
 const EXPLAIN_SYS = `You are an expert document analyst. Provide a comprehensive, detailed explanation of the document. Return ONLY a valid JSON object with NO markdown fences or preamble:
 {
   "overview": "A thorough 3-5 sentence overview of what the document covers, its purpose, and significance.",
+  "diagram": "Valid Mermaid markdown strictly without enclosing backticks. A detailed, comprehensive flowchart TD or mindmap showing the conceptual structure of the document. Crucial: Do not use parentheses/brackets inside node text labels unless they are enclosed in double quotes (e.g. A[\\\"Label (with brackets)\\\"]).",
+  "diagramNodes": [
+    {
+      "id": "node_id",
+      "label": "The exact label of the node as written in the Mermaid diagram above.",
+      "details": "Thorough, detailed conceptual explanation (2-4 sentences) of this node's concept or step, which will be shown when the user clicks on this node."
+    }
+  ],
   "sections": [
     {
       "title": "Section heading describing the topic",
@@ -332,6 +750,7 @@ const EXPLAIN_SYS = `You are an expert document analyst. Provide a comprehensive
   ]
 }
 sections = 4-8 detailed sections covering all major topics; terminology = 3-8 key terms found in the document. Be thorough, educational, and insightful. Write as if explaining to someone who wants to deeply understand the document.`;
+
 
 function modeHint(m) {
   if (m === "bullets") return "Keep summary to 1 sentence. Bullet points under 10 words each.";
@@ -484,6 +903,16 @@ export default function App() {
   const [explainLoading, setExplainLoading] = useState(false);
   const [activeView, setActiveView] = useState("summary"); // "summary" | "detailed"
 
+  // Theme state: default to 'dark' to prevent the too-bright layout
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('smart_notes_theme') || 'dark';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('smart_notes_theme', theme);
+  }, [theme]);
+
   const [history, setHistory] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('smart_notes_history') || '[]');
@@ -544,10 +973,10 @@ export default function App() {
 
   const canGo = !loading && (file || notes.trim().length > 20);
 
-  const summarize = async () => {
+  const summarize = async (targetMode = mode) => {
     setLoading(true); setResult(null); setError(null); setExplanation(null); setActiveView("summary");
     try {
-      const parsed = await callAPI(SYS, fileData, file, notes, mode, false);
+      const parsed = await callAPI(SYS, fileData, file, notes, targetMode, false);
       setResult(parsed);
       saveToHistory(parsed, file?.name || "Pasted Text");
     } catch (err) { setError(err.message || "Analysis failed. Please try again."); }
@@ -585,8 +1014,21 @@ export default function App() {
         <div className="page">
 
           <div className="top-nav">
+            <button className="btn-hist" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+              {theme === 'dark' ? (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                  Light Mode
+                </>
+              ) : (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                  Dark Mode
+                </>
+              )}
+            </button>
             <button className="btn-hist" onClick={() => setHistOpen(true)}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0118 0z"></path></svg>
               History
             </button>
           </div>
@@ -646,7 +1088,7 @@ export default function App() {
           )}
 
           <div className="controls">
-            <button className="btn-main" onClick={summarize} disabled={!canGo}>
+            <button className="btn-main" onClick={() => summarize(mode)} disabled={!canGo}>
               {loading
                 ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{animation:"spin 1s linear infinite"}}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Analyzing</>
                 : "Summarize →"}
@@ -654,7 +1096,18 @@ export default function App() {
             {(file || notes || result) && <button className="btn-ghost" onClick={clear}>Clear all</button>}
             <div className="modes">
               {MODES.map(m => (
-                <button key={m.id} className={`m-btn${mode === m.id ? " on" : ""}`} onClick={() => setMode(m.id)}>{m.label}</button>
+                <button
+                  key={m.id}
+                  className={`m-btn${mode === m.id ? " on" : ""}`}
+                  onClick={() => {
+                    setMode(m.id);
+                    if (file || notes.trim().length > 20) {
+                      summarize(m.id);
+                    }
+                  }}
+                >
+                  {m.label}
+                </button>
               ))}
             </div>
           </div>
@@ -700,7 +1153,7 @@ export default function App() {
                   {result.diagram && (
                     <div className="card">
                       <div className="c-label">Diagrammatic Representation</div>
-                      <MermaidChart chart={result.diagram} />
+                      <MermaidChart chart={result.diagram} theme={theme} />
                     </div>
                   )}
 
@@ -759,6 +1212,13 @@ export default function App() {
               {activeView === "detailed" && explanation && (
                 <div className="explain-content">
                   <div className="explain-overview">{explanation.overview}</div>
+
+                  {explanation.diagram && (
+                    <div style={{ marginBottom: "1.2rem" }}>
+                      <div className="c-label">Interactive Concept Map</div>
+                      <MermaidChart chart={explanation.diagram} theme={theme} nodes={explanation.diagramNodes || []} />
+                    </div>
+                  )}
 
                   <div className="explain-sections">
                     {explanation.sections?.map((sec, i) => (
