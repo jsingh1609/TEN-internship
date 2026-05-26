@@ -6,89 +6,93 @@ mermaid.initialize({ startOnLoad: false, theme: 'dark', fontFamily: 'Inter, sans
 
 // Sanitize AI-generated Mermaid code by wrapping node labels in double quotes
 // to prevent parse failures from special characters like & : ( ) etc.
-function balanceLines(code) {
-  const lines = code.split('\n');
-  const result = [];
-  let currentLine = '';
+function sanitizeNodeLabels(line) {
+  const t = line.trim();
+  if (!t || /^(graph\s|flowchart\s|%%|end$|style\s|classDef\s|click\s|linkStyle\s|direction\s)/i.test(t)) {
+    return line;
+  }
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (currentLine === '') {
-      currentLine = line;
+  let result = '';
+  let i = 0;
+  while (i < line.length) {
+    const match = line.slice(i).match(/^([A-Za-z0-9_]+)(\(\(|\(|\[|\{)/);
+    if (match) {
+      const nodeId = match[1];
+      const openDelim = match[2];
+      i += nodeId.length + openDelim.length;
+
+      let closeDelim = '';
+      if (openDelim === '((') closeDelim = '))';
+      else if (openDelim === '(') closeDelim = ')';
+      else if (openDelim === '[') closeDelim = ']';
+      else if (openDelim === '{') closeDelim = '}';
+
+      let depth = 1;
+      let labelStart = i;
+      let labelEnd = i;
+      while (i < line.length) {
+        if (openDelim === '((' && line.startsWith('))', i)) {
+          depth--;
+          if (depth === 0) {
+            labelEnd = i;
+            i += 2;
+            break;
+          }
+          i++;
+        } else if (openDelim === '(' && line[i] === '(') {
+          depth++;
+          i++;
+        } else if (openDelim === '(' && line[i] === ')') {
+          depth--;
+          if (depth === 0) {
+            labelEnd = i;
+            i++;
+            break;
+          }
+          i++;
+        } else if (openDelim === '[' && line[i] === '[') {
+          depth++;
+          i++;
+        } else if (openDelim === '[' && line[i] === ']') {
+          depth--;
+          if (depth === 0) {
+            labelEnd = i;
+            i++;
+            break;
+          }
+          i++;
+        } else if (openDelim === '{' && line[i] === '{') {
+          depth++;
+          i++;
+        } else if (openDelim === '{' && line[i] === '}') {
+          depth--;
+          if (depth === 0) {
+            labelEnd = i;
+            i++;
+            break;
+          }
+          i++;
+        } else {
+          i++;
+        }
+      }
+
+      let label = line.slice(labelStart, labelEnd);
+      if (label.startsWith('"') && label.endsWith('"')) {
+        label = label.slice(1, -1);
+      }
+      const cleanLabel = label.replace(/"/g, "'");
+      result += `${nodeId}${openDelim}"${cleanLabel}"${closeDelim}`;
     } else {
-      currentLine += ' ' + line.trim();
-    }
-
-    if (isBalanced(currentLine)) {
-      result.push(currentLine);
-      currentLine = '';
+      result += line[i];
+      i++;
     }
   }
-
-  if (currentLine !== '') {
-    result.push(currentLine);
-  }
-
-  return result.join('\n');
+  return result;
 }
 
-function isBalanced(str) {
-  let parens = 0;
-  let brackets = 0;
-  let braces = 0;
-  let inQuotes = false;
-
-  for (let i = 0; i < str.length; i++) {
-    const char = str[i];
-    if (char === '"' && (i === 0 || str[i - 1] !== '\\')) {
-      inQuotes = !inQuotes;
-    }
-    if (!inQuotes) {
-      if (char === '(') parens++;
-      if (char === ')') parens--;
-      if (char === '[') brackets++;
-      if (char === ']') brackets--;
-      if (char === '{') braces++;
-      if (char === '}') braces--;
-    }
-  }
-
-  return parens <= 0 && brackets <= 0 && braces <= 0 && !inQuotes;
-}
-
-// Sanitize AI-generated Mermaid code by wrapping node labels in double quotes
-// to prevent parse failures from special characters like & : ( ) etc.
 function sanitizeMermaid(code) {
-  const balancedCode = balanceLines(code);
-
-  return balancedCode.split('\n').map(line => {
-    const t = line.trim();
-    if (!t || /^(graph\s|flowchart\s|%%|end$|style\s|classDef\s|click\s|linkStyle\s|direction\s)/i.test(t)) {
-      return line;
-    }
-    let result = line;
-    // Double-parens (circle nodes): ID((text)) -> ID(("text"))
-    result = result.replace(/(\b[A-Za-z_]\w*)\(\(([^)]+)\)\)/g, (m, id, text) => {
-      if (text.startsWith('"') && text.endsWith('"')) return m;
-      return `${id}(("${text.replace(/"/g, "'")}"))`;
-    });
-    // Single-parens (rounded rect): ID(text) -> ID("text")
-    result = result.replace(/(\b[A-Za-z_]\w*)\((?!\()([^)]+)\)(?!\))/g, (m, id, text) => {
-      if (text.startsWith('"') && text.endsWith('"')) return m;
-      return `${id}("${text.replace(/"/g, "'")}")`;  
-    });
-    // Brackets: ID[text] -> ID["text"]
-    result = result.replace(/(\b[A-Za-z_]\w*)\[([^\]]+)\]/g, (m, id, text) => {
-      if (text.startsWith('"') && text.endsWith('"')) return m;
-      return `${id}["${text.replace(/"/g, "'")}"]`;
-    });
-    // Curly braces (diamond): ID{text} -> ID{"text"}
-    result = result.replace(/(\b[A-Za-z_]\w*)\{(?!\{)([^}]+)\}(?!\})/g, (m, id, text) => {
-      if (text.startsWith('"') && text.endsWith('"')) return m;
-      return `${id}{"${text.replace(/"/g, "'")}"}`;  
-    });
-    return result;
-  }).join('\n');
+  return code.split('\n').map(sanitizeNodeLabels).join('\n');
 }
 
 const MermaidChart = ({ chart, theme, nodes = [] }) => {
