@@ -6,8 +6,62 @@ mermaid.initialize({ startOnLoad: false, theme: 'dark', fontFamily: 'Inter, sans
 
 // Sanitize AI-generated Mermaid code by wrapping node labels in double quotes
 // to prevent parse failures from special characters like & : ( ) etc.
+function balanceLines(code) {
+  const lines = code.split('\n');
+  const result = [];
+  let currentLine = '';
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (currentLine === '') {
+      currentLine = line;
+    } else {
+      currentLine += ' ' + line.trim();
+    }
+
+    if (isBalanced(currentLine)) {
+      result.push(currentLine);
+      currentLine = '';
+    }
+  }
+
+  if (currentLine !== '') {
+    result.push(currentLine);
+  }
+
+  return result.join('\n');
+}
+
+function isBalanced(str) {
+  let parens = 0;
+  let brackets = 0;
+  let braces = 0;
+  let inQuotes = false;
+
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i];
+    if (char === '"' && (i === 0 || str[i - 1] !== '\\')) {
+      inQuotes = !inQuotes;
+    }
+    if (!inQuotes) {
+      if (char === '(') parens++;
+      if (char === ')') parens--;
+      if (char === '[') brackets++;
+      if (char === ']') brackets--;
+      if (char === '{') braces++;
+      if (char === '}') braces--;
+    }
+  }
+
+  return parens <= 0 && brackets <= 0 && braces <= 0 && !inQuotes;
+}
+
+// Sanitize AI-generated Mermaid code by wrapping node labels in double quotes
+// to prevent parse failures from special characters like & : ( ) etc.
 function sanitizeMermaid(code) {
-  return code.split('\n').map(line => {
+  const balancedCode = balanceLines(code);
+
+  return balancedCode.split('\n').map(line => {
     const t = line.trim();
     if (!t || /^(graph\s|flowchart\s|%%|end$|style\s|classDef\s|click\s|linkStyle\s|direction\s)/i.test(t)) {
       return line;
@@ -23,21 +77,15 @@ function sanitizeMermaid(code) {
       if (text.startsWith('"') && text.endsWith('"')) return m;
       return `${id}("${text.replace(/"/g, "'")}")`;  
     });
-    // Brackets with special chars: ID[text] -> ID["text"]
+    // Brackets: ID[text] -> ID["text"]
     result = result.replace(/(\b[A-Za-z_]\w*)\[([^\]]+)\]/g, (m, id, text) => {
       if (text.startsWith('"') && text.endsWith('"')) return m;
-      if (/[&:;#<>{}()|]/.test(text)) {
-        return `${id}["${text.replace(/"/g, "'")}"]`;
-      }
-      return m;
+      return `${id}["${text.replace(/"/g, "'")}"]`;
     });
     // Curly braces (diamond): ID{text} -> ID{"text"}
     result = result.replace(/(\b[A-Za-z_]\w*)\{(?!\{)([^}]+)\}(?!\})/g, (m, id, text) => {
       if (text.startsWith('"') && text.endsWith('"')) return m;
-      if (/[&:;#<>()|\[\]]/.test(text)) {
-        return `${id}{"${text.replace(/"/g, "'")}"}`;  
-      }
-      return m;
+      return `${id}{"${text.replace(/"/g, "'")}"}`;  
     });
     return result;
   }).join('\n');
@@ -224,7 +272,8 @@ const MermaidChart = ({ chart, theme, nodes = [] }) => {
           <strong style={{ color: 'var(--text)', fontSize: '0.88rem', fontFamily: 'var(--sans)' }}>Diagram rendering failed</strong>
         </div>
         <div className="mermaid-error-text">
-          <span>The AI-generated diagram contains syntax that Mermaid could not parse.</span>
+          <span>The AI-generated diagram contains syntax that Mermaid could not parse:</span>
+          {error && <pre style={{ marginTop: '8px', padding: '0.5rem', background: 'var(--bg-warm)', border: '1px solid var(--border)', borderRadius: '4px', fontSize: '0.75rem', color: '#c0544a', whiteSpace: 'pre-wrap', fontFamily: 'var(--mono)' }}>{error}</pre>}
         </div>
         <details className="mermaid-raw-details">
           <summary>View raw diagram code</summary>
