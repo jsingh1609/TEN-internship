@@ -4,6 +4,45 @@ import mermaid from "mermaid";
 
 mermaid.initialize({ startOnLoad: false, theme: 'dark', fontFamily: 'Inter, sans-serif', suppressErrorRendering: true });
 
+// Sanitize AI-generated Mermaid code by wrapping node labels in double quotes
+// to prevent parse failures from special characters like & : ( ) etc.
+function sanitizeMermaid(code) {
+  return code.split('\n').map(line => {
+    const t = line.trim();
+    if (!t || /^(graph\s|flowchart\s|%%|end$|style\s|classDef\s|click\s|linkStyle\s|direction\s)/i.test(t)) {
+      return line;
+    }
+    let result = line;
+    // Double-parens (circle nodes): ID((text)) -> ID(("text"))
+    result = result.replace(/(\b[A-Za-z_]\w*)\(\(([^)]+)\)\)/g, (m, id, text) => {
+      if (text.startsWith('"') && text.endsWith('"')) return m;
+      return `${id}(("${text.replace(/"/g, "'")}"))`;
+    });
+    // Single-parens (rounded rect): ID(text) -> ID("text")
+    result = result.replace(/(\b[A-Za-z_]\w*)\((?!\()([^)]+)\)(?!\))/g, (m, id, text) => {
+      if (text.startsWith('"') && text.endsWith('"')) return m;
+      return `${id}("${text.replace(/"/g, "'")}")`;  
+    });
+    // Brackets with special chars: ID[text] -> ID["text"]
+    result = result.replace(/(\b[A-Za-z_]\w*)\[([^\]]+)\]/g, (m, id, text) => {
+      if (text.startsWith('"') && text.endsWith('"')) return m;
+      if (/[&:;#<>{}()|]/.test(text)) {
+        return `${id}["${text.replace(/"/g, "'")}"]`;
+      }
+      return m;
+    });
+    // Curly braces (diamond): ID{text} -> ID{"text"}
+    result = result.replace(/(\b[A-Za-z_]\w*)\{(?!\{)([^}]+)\}(?!\})/g, (m, id, text) => {
+      if (text.startsWith('"') && text.endsWith('"')) return m;
+      if (/[&:;#<>()|\[\]]/.test(text)) {
+        return `${id}{"${text.replace(/"/g, "'")}"}`;  
+      }
+      return m;
+    });
+    return result;
+  }).join('\n');
+}
+
 const MermaidChart = ({ chart, theme, nodes = [] }) => {
   const ref = useRef(null);
   const containerRef = useRef(null);
@@ -114,6 +153,8 @@ const MermaidChart = ({ chart, theme, nodes = [] }) => {
         .replace(/```/g, "")
         .trim();
 
+      const sanitizedChart = sanitizeMermaid(cleanedChart);
+
       try {
         mermaid.initialize({ 
           startOnLoad: false, 
@@ -124,7 +165,7 @@ const MermaidChart = ({ chart, theme, nodes = [] }) => {
         
         const uniqueId = `mermaid-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
         
-        mermaid.render(uniqueId, cleanedChart)
+        mermaid.render(uniqueId, sanitizedChart)
           .then((result) => {
             if (ref.current) {
               ref.current.innerHTML = result.svg;
@@ -719,14 +760,14 @@ const SYS = `You are an expert notes analyst. Return ONLY a valid JSON object wi
   "keywords": ["term1","term2","term3","term4","term5","term6"],
   "tone": "Technical | Casual | Academic | Professional | Creative | Journalistic",
   "wordCount": 123,
-  "diagram": "Valid Mermaid markdown strictly without enclosing backticks. A comprehensive flowchart TD or mindmap summarizing the structure. Crucial: Do not use parentheses/brackets inside node text labels unless they are enclosed in double quotes (e.g. A[\\\"Label (with brackets)\\\"])."
+  "diagram": "Valid Mermaid markdown strictly without enclosing backticks. A comprehensive flowchart TD or mindmap summarizing the structure. CRUCIAL: ALWAYS enclose all node text labels in double quotes (e.g. A[\"Node Label Text\"]) to prevent syntax errors with special characters like colons, brackets, or ampersands."
 }
 keyPoints = 3-6 insights; actionItems = tasks found (empty array if none, max 5); keywords = 5-8 topics; wordCount = approximate count.`;
 
 const EXPLAIN_SYS = `You are an expert document analyst. Provide a comprehensive, detailed explanation of the document. Return ONLY a valid JSON object with NO markdown fences or preamble:
 {
   "overview": "A thorough 3-5 sentence overview of what the document covers, its purpose, and significance.",
-  "diagram": "Valid Mermaid markdown strictly without enclosing backticks. A detailed, comprehensive flowchart TD or mindmap showing the conceptual structure of the document. Crucial: Do not use parentheses/brackets inside node text labels unless they are enclosed in double quotes (e.g. A[\\\"Label (with brackets)\\\"]).",
+  "diagram": "Valid Mermaid markdown strictly without enclosing backticks. A detailed, comprehensive flowchart TD or mindmap showing the conceptual structure of the document. CRUCIAL: ALWAYS enclose all node text labels in double quotes (e.g. A[\"Node Label Text\"]) to prevent syntax errors with special characters like colons, brackets, or ampersands.",
   "diagramNodes": [
     {
       "id": "node_id",
@@ -1150,7 +1191,7 @@ export default function App() {
                     <p className="sum-body">{result.summary}</p>
                   </div>
 
-                  {result.diagram && (
+                  {result.diagram && mode === 'diagram' && (
                     <div className="card">
                       <div className="c-label">Diagrammatic Representation</div>
                       <MermaidChart chart={result.diagram} theme={theme} />
